@@ -500,10 +500,15 @@ void report_realtime_status()
   // Report machine position
   if (bit_istrue(settings.status_report_mask,BITFLAG_RT_STATUS_POSITION_TYPE)) {
     printPgmString(PSTR("|MPos:"));
+    PrintPosLCD((float)print_position[0], (float)print_position[1],(float)print_position[2]);
   } else {
     printPgmString(PSTR("|WPos:"));
+    PrintPosLCD((float)print_position[0], (float)print_position[1],(float)print_position[2]);
   }
+  //PrintPosLCD((float)print_position[0], (float)print_position[1],(float)print_position[2]);
   report_util_axis_values(print_position);
+   
+  //PrintPosLCD(123.56, 25.45, 112.33);
 
   // Returns planner and serial read buffer states.
   #ifdef REPORT_FIELD_BUFFER_STATE
@@ -567,6 +572,7 @@ void report_realtime_status()
       if (sys.report_ovr_counter == 0) { sys.report_ovr_counter = 1; } // Set override on next report.
       printPgmString(PSTR("|WCO:"));
       report_util_axis_values(wco);
+     // PrintWcoLCD(wco[0], wco[1],wco[2])
     }
   #endif
 

@@ -21,6 +21,7 @@
 #ifndef grbl_h
 #define grbl_h
 
+
 // Grbl versioning system
 #define GRBL_VERSION "1.1f"
 #define GRBL_VERSION_BUILD "20170802"
@@ -52,7 +53,7 @@
 #include "limits.h"
 #include "motion_control.h"
 #include "planner.h"
-#include "print.h"
+#include "cprint.h"
 #include "probe.h"
 #include "protocol.h"
 #include "report.h"
@@ -61,6 +62,7 @@
 #include "stepper.h"
 #include "jog.h"
 #include "sleep.h"
+#include "lcd.h"
 
 // ---------------------------------------------------------------------------------------
 // COMPILE-TIME ERROR CHECKING OF DEFINE VALUES:

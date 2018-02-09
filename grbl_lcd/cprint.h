@@ -19,8 +19,8 @@
   along with Grbl.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef print_h
-#define print_h
+#ifndef cprint_h
+#define cprint_h
 
 
 void printString(const char *s);

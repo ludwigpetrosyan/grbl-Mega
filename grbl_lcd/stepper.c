@@ -391,8 +391,11 @@ ISR(TIMER1_COMPA_vect)
 
   // Enable step pulse reset timer so that The Stepper Port Reset Interrupt can reset the signal after
   // exactly settings.pulse_microseconds microseconds, independent of the main Timer1 prescaler.
-  TCNT0 = st.step_pulse_time; // Reload Timer0 counter
-  TCCR0B = (1<<CS01); // Begin Timer0. Full speed, 1/8 prescaler
+ // TCNT0 = st.step_pulse_time; // Reload Timer0 counter
+ // TCCR0B = (1<<CS01); // Begin Timer0. Full speed, 1/8 prescaler
+  
+  TCNT2 = st.step_pulse_time; // Reload Timer0 counter
+  TCCR2B = (1<<CS21); // Begin Timer0. Full speed, 1/8 prescaler
 
   busy = true;
   sei(); // Re-enable interrupts to allow Stepper Port Reset Interrupt to fire on-time.
@@ -558,6 +561,7 @@ ISR(TIMER1_COMPA_vect)
 // This interrupt is enabled by ISR_TIMER1_COMPAREA when it sets the motor port bits to execute
 // a step. This ISR resets the motor port after a short period (settings.pulse_microseconds)
 // completing one step cycle.
+/*
 ISR(TIMER0_OVF_vect)
 {
   // Reset stepping pins (leave the direction pins)
@@ -577,6 +581,38 @@ ISR(TIMER0_OVF_vect)
   // The new timing between direction, step pulse, and step complete events are setup in the
   // st_wake_up() routine.
   ISR(TIMER0_COMPA_vect)
+  {
+    #ifdef DEFAULTS_RAMPS_BOARD
+      STEP_PORT(0) = st.step_bits[0]; // Begin step pulse.
+      STEP_PORT(1) = st.step_bits[1]; // Begin step pulse.
+      STEP_PORT(2) = st.step_bits[2]; // Begin step pulse.
+    #else
+      STEP_PORT = st.step_bits; // Begin step pulse.
+    #endif // Ramps Board
+  }
+#endif
+*/
+
+
+ISR(TIMER2_OVF_vect)
+{
+  // Reset stepping pins (leave the direction pins)
+  #ifdef DEFAULTS_RAMPS_BOARD
+    STEP_PORT(0) = (STEP_PORT(0) & ~(1 << STEP_BIT(0))) | step_port_invert_mask[0];
+    STEP_PORT(1) = (STEP_PORT(1) & ~(1 << STEP_BIT(1))) | step_port_invert_mask[1];
+    STEP_PORT(2) = (STEP_PORT(2) & ~(1 << STEP_BIT(2))) | step_port_invert_mask[2];
+  #else
+    STEP_PORT = (STEP_PORT & ~STEP_MASK) | (step_port_invert_mask & STEP_MASK);
+  #endif // Ramps Board
+  TCCR2B = 0; // Disable Timer0 to prevent re-entering this interrupt when it's not needed.
+}
+#ifdef STEP_PULSE_DELAY
+  // This interrupt is used only when STEP_PULSE_DELAY is enabled. Here, the step pulse is
+  // initiated after the STEP_PULSE_DELAY time period has elapsed. The ISR TIMER2_OVF interrupt
+  // will then trigger after the appropriate settings.pulse_microseconds, as in normal operation.
+  // The new timing between direction, step pulse, and step complete events are setup in the
+  // st_wake_up() routine.
+  ISR(TIMER2_COMPA_vect)
   {
     #ifdef DEFAULTS_RAMPS_BOARD
       STEP_PORT(0) = st.step_bits[0]; // Begin step pulse.
@@ -683,6 +719,7 @@ void stepper_init()
   // TCCR1B = (TCCR1B & ~((1<<CS12) | (1<<CS11))) | (1<<CS10); // Set in st_go_idle().
   // TIMSK1 &= ~(1<<OCIE1A);  // Set in st_go_idle().
 
+/*
   // Configure Timer 0: Stepper Port Reset Interrupt
   TIMSK0 &= ~((1<<OCIE0B) | (1<<OCIE0A) | (1<<TOIE0)); // Disconnect OC0 outputs and OVF interrupt.
   TCCR0A = 0; // Normal operation
@@ -690,6 +727,15 @@ void stepper_init()
   TIMSK0 |= (1<<TOIE0); // Enable Timer0 overflow interrupt
   #ifdef STEP_PULSE_DELAY
     TIMSK0 |= (1<<OCIE0A); // Enable Timer0 Compare Match A interrupt
+  #endif
+  */
+   // Configure Timer 0: Stepper Port Reset Interrupt
+  TIMSK2 &= ~((1<<OCIE2B) | (1<<OCIE2A) | (1<<TOIE2)); // Disconnect OC0 outputs and OVF interrupt.
+  TCCR2A = 0; // Normal operation
+  TCCR2B = 0; // Disable Timer0 until needed
+  TIMSK2 |= (1<<TOIE2); // Enable Timer0 overflow interrupt
+  #ifdef STEP_PULSE_DELAY
+    TIMSK2 |= (1<<OCIE2A); // Enable Timer0 Compare Match A interrupt
   #endif
 }
 

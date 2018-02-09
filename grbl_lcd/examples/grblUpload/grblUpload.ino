@@ -23,7 +23,7 @@ For advanced users:
 Copyright (c) 2015 Sungeun K. Jeon
 Released under the MIT-license. See license.txt for details.
 ***********************************************************************/
-
+#include <LiquidCrystal.h>
 #include <grbl.h>
 
 // Do not alter this file!

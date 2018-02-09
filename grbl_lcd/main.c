@@ -66,6 +66,16 @@ int main(void)
     if (bit_istrue(settings.flags,BITFLAG_HOMING_ENABLE)) { sys.state = STATE_ALARM; }
   #endif
 
+   SetUpLCD();
+   
+   SetCursorLCD(0, 1);
+   PrintLCD(123.45);
+  SetCursorLCD(7, 1);
+  PrintLCD(678.91);
+   SetCursorLCD(14, 1);
+  PrintLCD(245.76);
+  PrintPosLCD(123.56, 25.45, 112.33);
+
   // Grbl initialization loop upon power-up or a system abort. For the latter, all processes
   // will return to this loop to be cleanly re-initialized.
   for(;;) {
