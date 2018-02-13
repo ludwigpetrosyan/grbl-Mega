@@ -101,6 +101,7 @@ void protocol_main_loop()
           report_status_message(STATUS_SYSTEM_GC_LOCK);
         } else {
           // Parse and execute g-code block.
+          PrintComandLCD(line);
           report_status_message(gc_execute_line(line));
         }
 
@@ -247,6 +248,7 @@ void protocol_exec_rt_system()
 
     // Execute system abort.
     if (rt_exec & EXEC_RESET) {
+		PrintComandLCD("      ");
       sys.abort = true;  // Only place this is set true.
       return; // Nothing else to do but exit.
     }
@@ -482,6 +484,36 @@ void protocol_exec_rt_system()
       }
     }
   }
+  
+  //added
+  rt_exec = sys_rt_exec_axis; // Copy volatile sys_rt_exec_alarm.
+  if (rt_exec) {
+	   if (sys.state != STATE_HOLD){
+				PrintComandLCD("AXIS");
+	   } 
+	   //system_clear_exec_axis_flag(uint8_t mask);
+}
+  
+  
+  rt_exec = sys_rt_exec_position; // Copy volatile sys_rt_exec_alarm.
+  if (rt_exec) {
+	  if (sys.state != STATE_HOLD){
+		    if (rt_exec & EXEC_GO_HOME){
+				PrintComandLCD("HOME");
+				//report_status_message(system_execute_line( "<H"));
+				report_status_message(gc_execute_line( "G0X0Y0Z0"));
+				system_clear_exec_position_flag(EXEC_GO_HOME);
+			}
+			 if (rt_exec & EXEC_SET_ZERO){
+				PrintComandLCD("ZERO");
+				//report_status_message(gc_execute_line( "G92X0Y0Z0"));
+				system_clear_exec_position_flag(EXEC_SET_ZERO);
+			}
+		} 
+	  
+}
+  //end added
+  
 
   #ifdef DEBUG
     if (sys_rt_exec_debug) {

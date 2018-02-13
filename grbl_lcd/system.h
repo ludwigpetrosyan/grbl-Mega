@@ -37,6 +37,21 @@
 #define EXEC_MOTION_CANCEL  bit(6) // bitmask 01000000
 #define EXEC_SLEEP          bit(7) // bitmask 10000000
 
+
+//sys_rt_exec_axis  = 0;   // added
+#define EXEC_Z_UP  bit(0) // bitmask 00000001
+#define EXEC_Z_DOWN    bit(1) // bitmask 00000010
+#define EXEC_Z_SET_ZERO     bit(2) // bitmask 00000100
+#define EXEC_X_UP      bit(3) // bitmask 00001000
+#define EXEC_X_DOWN          bit(4) // bitmask 00010000
+#define EXEC_Y_DOWN    bit(5) // bitmask 00100000
+#define EXEC_Y_UPL  bit(6) // bitmask 01000000
+#define EXEC_XY_SET_ZERO         bit(7) // bitmask 10000000
+//sys_rt_exec_position = 0;   // added
+#define EXEC_GO_HOME  bit(0) // bitmask 00000001
+#define EXEC_SET_ZERO    bit(1) // bitmask 00000010
+
+
 // Alarm executor codes. Valid values (1-255). Zero is reserved.
 #define EXEC_ALARM_HARD_LIMIT           1
 #define EXEC_ALARM_SOFT_LIMIT           2
@@ -107,6 +122,24 @@
 #define CONTROL_PIN_INDEX_FEED_HOLD     bit(2)
 #define CONTROL_PIN_INDEX_CYCLE_START   bit(3)
 
+/*
+//sys_rt_exec_axis  = 0;   // added
+#define EXEC_Z_UP  bit(0) // bitmask 00000001
+#define EXEC_Z_DOWN    bit(1) // bitmask 00000010
+#define EXEC_Z_SET_ZERO     bit(2) // bitmask 00000100
+#define EXEC_X_UP      bit(3) // bitmask 00001000
+#define EXEC_X_DOWN          bit(4) // bitmask 00010000
+#define EXEC_Y_DOWN    bit(5) // bitmask 00100000
+#define EXEC_Y_UPL  bit(6) // bitmask 01000000
+#define EXEC_XY_SET_ZERO         bit(7) // bitmask 10000000
+//sys_rt_exec_position = 0;   // added
+#define EXEC_GO_HOME  bit(0) // bitmask 00000001
+#define EXEC_SET_ZERO    bit(1) // bitmask 00000010
+#define CONTROL_PIN_INDEX_GO_HOME   bit(4) //added
+*/
+#define CONTROL_PIN_INDEX_GO_HOME   bit(4) //port DDRK pin 11
+#define CONTROL_PIN_INDEX_SET_ZERO   bit(5) //port DDRK pin 11
+
 // Define spindle stop override control states.
 #define SPINDLE_STOP_OVR_DISABLED       0  // Must be zero.
 #define SPINDLE_STOP_OVR_ENABLED        bit(0)
@@ -150,6 +183,9 @@ extern volatile uint8_t sys_rt_exec_state;   // Global realtime executor bitflag
 extern volatile uint8_t sys_rt_exec_alarm;   // Global realtime executor bitflag variable for setting various alarms.
 extern volatile uint8_t sys_rt_exec_motion_override; // Global realtime executor bitflag variable for motion-based overrides.
 extern volatile uint8_t sys_rt_exec_accessory_override; // Global realtime executor bitflag variable for spindle/coolant overrides.
+
+extern volatile uint8_t sys_rt_exec_axis;   // added Global realtime executor bitflag variable for axis movement.
+extern volatile uint8_t sys_rt_exec_position;   // added Global realtime executor bitflag variable for homing and zeroing.
 
 #ifdef DEBUG
   #define EXEC_DEBUG_REPORT  bit(0)
@@ -198,6 +234,11 @@ void system_set_exec_motion_override_flag(uint8_t mask);
 void system_set_exec_accessory_override_flag(uint8_t mask);
 void system_clear_exec_motion_overrides();
 void system_clear_exec_accessory_overrides();
+
+void system_set_exec_axis_flag(uint8_t mask);
+void system_set_exec_position_flag(uint8_t mask);
+void system_clear_exec_axis_flag(uint8_t mask);
+void system_clear_exec_position_flag(uint8_t mask);
 
 
 #endif

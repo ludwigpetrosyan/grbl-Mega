@@ -57,6 +57,7 @@ void PrintPosLCDX(float x);
 void PrintPosLCDY(float y);
 void PrintPosLCDZ(float z);
 void PrintWcoLCD(float x, float y, float z);
+void PrintComandLCD(char* st);
 
 #ifdef __cplusplus
 }

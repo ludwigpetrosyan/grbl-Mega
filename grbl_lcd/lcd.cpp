@@ -31,7 +31,7 @@ void setup_lcd() {
   
   lcd.setCursor(0, 3);
   lcd.print("STEP:");
-  lcd.setCursor(10, 3);
+  lcd.setCursor(11, 3);
   lcd.print("JOG:");
   lcd.setCursor(0, 0);
   lcd.print("******");
@@ -49,6 +49,14 @@ void setup_lcd() {
  void SetCursorLCD(uint8_t i, uint8_t r)
 {
 	lcd.setCursor(i, r);
+}
+
+void PrintComandLCD(char* st)
+{
+	 lcd.setCursor(0, 3);
+     lcd.print("                   ");
+     lcd.setCursor(0, 3);
+     lcd.print(st);
 }
 
  void PrintLCD(double pos)
