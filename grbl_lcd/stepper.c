@@ -1232,3 +1232,12 @@ float st_get_realtime_rate()
   }
   return 0.0f;
 }
+
+uint16_t st_get_pwm_rate()
+{
+	if (sys.state & (STATE_CYCLE | STATE_HOMING | STATE_HOLD | STATE_JOG | STATE_SAFETY_DOOR)){
+    return prep.current_spindle_pwm;
+  }
+  return 0;
+}
+

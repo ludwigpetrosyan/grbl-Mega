@@ -452,19 +452,38 @@ void report_realtime_status()
   // Report current machine state and sub-states
   serial_write('<');
   switch (sys.state) {
-    case STATE_IDLE: printPgmString(PSTR("Idle")); break;
-    case STATE_CYCLE: printPgmString(PSTR("Run")); break;
+    case STATE_IDLE: 
+		printPgmString(PSTR("Idle")); 
+		PrintStatusLCD("Idle  ");
+		break;
+    case STATE_CYCLE: 
+		printPgmString(PSTR("Run")); 
+		PrintStatusLCD("Run   ");
+		break;
     case STATE_HOLD:
       if (!(sys.suspend & SUSPEND_JOG_CANCEL)) {
         printPgmString(PSTR("Hold:"));
         if (sys.suspend & SUSPEND_HOLD_COMPLETE) { serial_write('0'); } // Ready to resume
         else { serial_write('1'); } // Actively holding
+        PrintStatusLCD("Hold  ");
         break;
       } // Continues to print jog state during jog cancel.
-    case STATE_JOG: printPgmString(PSTR("Jog")); break;
-    case STATE_HOMING: printPgmString(PSTR("Home")); break;
-    case STATE_ALARM: printPgmString(PSTR("Alarm")); break;
-    case STATE_CHECK_MODE: printPgmString(PSTR("Check")); break;
+    case STATE_JOG: 
+		printPgmString(PSTR("Jog")); 
+		PrintStatusLCD("Jog   ");
+		break;
+    case STATE_HOMING: 
+		printPgmString(PSTR("Home")); 
+		PrintStatusLCD("Home  ");
+		break;
+    case STATE_ALARM: 
+		printPgmString(PSTR("Alarm")); 
+		PrintStatusLCD("Alarm ");
+		break;
+    case STATE_CHECK_MODE: 
+		printPgmString(PSTR("Check")); 
+		PrintStatusLCD("Check ");
+		break;
     case STATE_SAFETY_DOOR:
       printPgmString(PSTR("Door:"));
       if (sys.suspend & SUSPEND_INITIATE_RESTORE) {
@@ -480,8 +499,12 @@ void report_realtime_status()
           serial_write('2'); // Retracting
         }
       }
+      PrintStatusLCD("Door  ");
       break;
-    case STATE_SLEEP: printPgmString(PSTR("Sleep")); break;
+    case STATE_SLEEP: 
+		printPgmString(PSTR("Sleep")); 
+		PrintStatusLCD("Sleep ");
+		break;
   }
 
   float wco[N_AXIS];
@@ -501,6 +524,8 @@ void report_realtime_status()
   if (bit_istrue(settings.status_report_mask,BITFLAG_RT_STATUS_POSITION_TYPE)) {
     printPgmString(PSTR("|MPos:"));
     PrintPosLCD((float)print_position[0], (float)print_position[1],(float)print_position[2]);
+    //PrintPosLCD(123.56, 25.45, 112.33);
+    //PrintPosLCDX((float)print_position[0]);
   } else {
     printPgmString(PSTR("|WPos:"));
     PrintPosLCD((float)print_position[0], (float)print_position[1],(float)print_position[2]);
@@ -539,6 +564,12 @@ void report_realtime_status()
     serial_write(',');
     printFloat(sys.spindle_speed,N_DECIMAL_RPMVALUE);
   #endif
+  PrintFeedLCD(st_get_realtime_rate());
+  //PrintPwmLCD(st_get_pwm_rate());
+  PrintSpindleLCD(sys.spindle_speed);
+  
+  
+  
 
   #ifdef REPORT_FIELD_PIN_STATE
     uint8_t lim_pin_state = limits_get_state();
@@ -572,7 +603,7 @@ void report_realtime_status()
       if (sys.report_ovr_counter == 0) { sys.report_ovr_counter = 1; } // Set override on next report.
       printPgmString(PSTR("|WCO:"));
       report_util_axis_values(wco);
-     // PrintWcoLCD(wco[0], wco[1],wco[2])
+      PrintWcoLCD(wco[0], wco[1],wco[2]);
     }
   #endif
 
