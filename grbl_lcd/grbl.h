@@ -38,6 +38,7 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <stdbool.h>
+#include <Arduino.h>
 
 // Define the Grbl system include files. NOTE: Do not alter organization.
 #include "config.h"

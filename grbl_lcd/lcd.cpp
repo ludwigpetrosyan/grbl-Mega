@@ -1,6 +1,8 @@
 
 #include <LiquidCrystal.h>
 #include "lcd.h"
+#include <math.h>
+//#include <stdio.h>
 
 //#ifdef __cplusplus
 //extern "C" {
@@ -31,13 +33,13 @@ void setup_lcd() {
   
   lcd.setCursor(0, 3);
   lcd.print("STEP:");
-  lcd.setCursor(11, 3);
-  lcd.print("JOG:");
+  lcd.setCursor(14, 3);
+  lcd.print("SF:");
   lcd.setCursor(0, 0);
   lcd.print("******");
   lcd.setCursor(7, 0);
   lcd.print("F:");
-  lcd.setCursor(14, 0);
+  lcd.setCursor(13, 0);
   lcd.print("S:");
 }
 
@@ -51,12 +53,38 @@ void setup_lcd() {
 	lcd.setCursor(i, r);
 }
 
+
+void PrintMillsLCD(int of, uint8_t cn)
+{
+	 char str[20];
+	 
+	 sprintf(str,"%-7d", cn);
+	 lcd.setCursor(10+of, 3);
+	 lcd.print(str);
+     //lcd.print("   ");
+     //lcd.setCursor(12+of, 3);
+     //lcd.print(cn);
+}
+
+void PrintXyzPinsLCD(int of, float f)
+{
+	 lcd.setCursor(10+of, 3);
+     //lcd.print("   ");
+     //lcd.setCursor(12+of, 3);
+     lcd.print(f);
+}
+
+
 void PrintComandLCD(char* st)
 {
+	 char str[20];
+	 
+	 sprintf(str,"%-6s", st);
 	 lcd.setCursor(0, 3);
-     lcd.print("                   ");
-     lcd.setCursor(0, 3);
-     lcd.print(st);
+	 lcd.print(str);
+     //lcd.print("            ");
+     //lcd.setCursor(0, 3);
+     //lcd.print(st);
 }
 
  void PrintLCD(double pos)
@@ -66,8 +94,16 @@ void PrintComandLCD(char* st)
 
  void PrintFeedLCD(float f)
 {
-	lcd.setCursor(9, 0);
-	lcd.print(f);
+	char str[20];
+	
+	sprintf(str,"F:%-3i", (int)f);
+	
+	//sprintf(str,"F:%f", f);
+	lcd.setCursor(7, 0);
+	
+	lcd.print(str);
+	//lcd.setCursor(9, 0);
+	//lcd.print(f);
 	lcd.setCursor(13, 0);
     lcd.print(" S:");
 }
@@ -75,18 +111,28 @@ void PrintComandLCD(char* st)
 
  void PrintPwmLCD(uint16_t f)
 {
+	char str[20];
+	
+	sprintf(str,"%-.4d", f);
 	lcd.setCursor(16, 0);
-	lcd.print("    ");
-	lcd.setCursor(16, 0);
-    lcd.print(f);
+	lcd.print(str);
+	
+	
+	//lcd.print("    ");
+	//lcd.setCursor(16, 0);
+    //lcd.print(f);
 }
 
  void PrintSpindleLCD(float f)
 {
+	char str[420];
+	
+	sprintf(str,"%-4i", (int)f);
 	lcd.setCursor(16, 0);
-	lcd.print("    ");
-	lcd.setCursor(16, 0);
-    lcd.print(f);
+	lcd.print(str);
+	//lcd.print("    ");
+	//lcd.setCursor(16, 0);
+    //lcd.print(f);
 }
 
  void PrintStatusLCD(char* st)
@@ -103,6 +149,8 @@ void PrintComandLCD(char* st)
 	lcd.print(y);
 	lcd.setCursor(14, 1);
 	lcd.print(z);
+	lcd.setCursor(19, 1);
+	lcd.print("W");
 }
 
  void PrintPosLCDX(float x)
@@ -131,7 +179,24 @@ void PrintComandLCD(char* st)
 	lcd.print(y);
 	lcd.setCursor(14, 2);
 	lcd.print(z);
+	lcd.setCursor(19, 2);
+	lcd.print("M");
 }
+
+void PrintSfeedLCD(int f)
+{
+	char str[20];
+	
+	sprintf(str,"%-.3d", f);
+	lcd.setCursor(17, 3);
+	lcd.print(str);
+	
+	
+	//lcd.print("    ");
+	//lcd.setCursor(16, 0);
+    //lcd.print(f);
+}
+
 
 //}
 /*

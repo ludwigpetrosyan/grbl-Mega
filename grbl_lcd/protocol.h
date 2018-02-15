@@ -41,4 +41,16 @@ void protocol_auto_cycle_start();
 // Block until all buffered steps are executed
 void protocol_buffer_synchronize();
 
+//added read digital pins for axis moving
+void protocol_read_axispins();
+
+//added read digital pins for axis moving
+int protocol_read_axisxyz(float* x, float* y, float* z);
+//added read digital pins for axis moving
+int protocol_read_axissetxy();
+//added read digital pins for axis moving
+int protocol_read_axissetz();
+
+
+extern volatile uint8_t protocol_count;
 #endif

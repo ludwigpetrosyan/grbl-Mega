@@ -71,8 +71,23 @@ void protocol_main_loop()
   uint8_t line_flags = 0;
   uint8_t char_counter = 0;
   uint8_t c;
+  
+  //added
+  float pin_x = 0.0;
+  float pin_y = 0.0;
+  float pin_z = 0.0;
+  int pin_pressed = 0;
+  
+  //char* axis_move_buttons = "G91G0X+0.01Y+0.01Z+0.01:G90";
+  //sfeed positio is 24
+  char* axis_move_buttons = "G91G1X+0.01Y+0.01Z+0.01F250";
+  
+  //end added
   for (;;) {
 
+	uint8_t rt_exec_m = 0; // Temp variable to avoid calling volatile multiple times.
+	//protocol_count++;
+	//PrintMillsLCD(4, protocol_count);
     // Process one line of incoming serial data, as the data becomes available. Performs an
     // initial filtering by removing spaces and comments and capitalizing all letters.
     while((c = serial_read()) != SERIAL_NO_DATA) {
@@ -101,7 +116,7 @@ void protocol_main_loop()
           report_status_message(STATUS_SYSTEM_GC_LOCK);
         } else {
           // Parse and execute g-code block.
-          PrintComandLCD(line);
+          //PrintComandLCD(line);
           report_status_message(gc_execute_line(line));
         }
 
@@ -151,6 +166,96 @@ void protocol_main_loop()
 
       }
     }
+    if(c == SERIAL_NO_DATA){
+		//added
+		  rt_exec_m = sys_rt_exec_axis; // Copy volatile sys_rt_exec_alarm.
+		  if (rt_exec_m) {
+			   if (sys.state != STATE_HOLD){
+						PrintComandLCD("AXIS");
+			   } 
+			   //system_clear_exec_axis_flag(uint8_t mask);
+		   }
+		  
+		  
+		  rt_exec_m = sys_rt_exec_position; // Copy volatile sys_rt_exec_alarm.
+		  if (rt_exec_m) {
+			  if (sys.state != STATE_HOLD){
+					if (rt_exec_m & EXEC_GO_HOME){
+						PrintComandLCD("HOME");
+						report_status_message(gc_execute_line( "G90G0X0Y0Z0"));
+						system_clear_exec_position_flag(EXEC_GO_HOME);
+					}
+					 if (rt_exec_m & EXEC_SET_ZERO){
+						PrintComandLCD("SFEED");
+						//report_status_message(gc_execute_line( "G92X0Y0Z0"));
+						if(sys.sfeed_rate == 250) sys.sfeed_rate = 50; else sys.sfeed_rate += 50;
+						system_clear_exec_position_flag(EXEC_SET_ZERO);
+					}
+				} 
+			  
+		}
+		//protocol_read_axispins();
+		pin_x = 0.0;
+		pin_y = 0.0;
+		pin_z = 0.0;
+		pin_pressed = 0;
+		pin_pressed = protocol_read_axisxyz(&pin_x, &pin_y, &pin_z);
+		//PrintMillsLCD(0, pin_pressed);
+		//PrintXyzPinsLCD(2, pin_x);
+		//PrintXyzPinsLCD(4, pin_y);
+		//PrintXyzPinsLCD(6, pin_z);
+		if(pin_pressed){
+			//axis_move_buttons
+			if(pin_x < 0) axis_move_buttons[6] = '-'; else axis_move_buttons[6] = '+';
+			if(pin_y < 0) axis_move_buttons[12] = '-'; else axis_move_buttons[12] = '+';
+			if(pin_z < 0) axis_move_buttons[18] = '-'; else axis_move_buttons[18] = '+';
+			if(!pin_x) axis_move_buttons[10] = '0'; else axis_move_buttons[10] = '1';
+			if(!pin_y) axis_move_buttons[16] = '0'; else axis_move_buttons[16] = '1';
+			if(!pin_z) axis_move_buttons[22] = '0'; else axis_move_buttons[22] = '1';
+			axis_move_buttons[24] = '0';
+			switch (sys.sfeed_rate){
+				case 50:
+					axis_move_buttons[24] = '0';
+					axis_move_buttons[25] = '5';
+					axis_move_buttons[26] = '0';
+					break;
+				case 100:
+					axis_move_buttons[24] = '1';
+					axis_move_buttons[25] = '0';
+					axis_move_buttons[26] = '0';
+					break;
+				case 150:
+					axis_move_buttons[24] = '1';
+					axis_move_buttons[25] = '5';
+					axis_move_buttons[26] = '0';
+					break;
+				case 200:
+					axis_move_buttons[24] = '2';
+					axis_move_buttons[25] = '0';
+					axis_move_buttons[26] = '0';
+					break;
+				case 250:
+					axis_move_buttons[24] = '2';
+					axis_move_buttons[25] = '5';
+					axis_move_buttons[26] = '0';
+					break;
+			}
+			//PrintComandLCD(&axis_move_buttons[22]);
+			report_status_message(gc_execute_line(axis_move_buttons));
+		}else{
+			pin_pressed = protocol_read_axissetxy();
+			if(pin_pressed){
+				report_status_message(gc_execute_line("G92X0Y0"));
+			}else{
+				pin_pressed = protocol_read_axissetz();
+					if(pin_pressed){
+					report_status_message(gc_execute_line("G92Z0"));
+				}
+			}
+		}
+			
+		  //end added
+	}
 
     // If there are no more characters in the serial read buffer to be processed and executed,
     // this indicates that g-code streaming has either filled the planner buffer or has
@@ -158,6 +263,9 @@ void protocol_main_loop()
     protocol_auto_cycle_start();
 
     protocol_execute_realtime();  // Runtime command check point.
+    
+    //Print status to LCD
+    report_lcd_status();
     if (sys.abort) { return; } // Bail to main() program loop to reset system.
               
     #ifdef SLEEP_ENABLE
@@ -248,7 +356,7 @@ void protocol_exec_rt_system()
 
     // Execute system abort.
     if (rt_exec & EXEC_RESET) {
-		PrintComandLCD("      ");
+		PrintComandLCD("RESET ");
       sys.abort = true;  // Only place this is set true.
       return; // Nothing else to do but exit.
     }
@@ -485,6 +593,7 @@ void protocol_exec_rt_system()
     }
   }
   
+  /*
   //added
   rt_exec = sys_rt_exec_axis; // Copy volatile sys_rt_exec_alarm.
   if (rt_exec) {
@@ -513,7 +622,7 @@ void protocol_exec_rt_system()
 	  
 }
   //end added
-  
+  */
 
   #ifdef DEBUG
     if (sys_rt_exec_debug) {
@@ -529,6 +638,115 @@ void protocol_exec_rt_system()
 
 }
 
+//added
+/*
+  #define xUpPin  53   // 
+  #define xDownPin  51   // 
+  #define yUpPin  49   // 
+  #define yDownPin  47   // 
+  #define zUpPin  45   // 
+  #define zDownPin  43   // 
+  #define xySetPin  41   // 
+  #define zSetPin  39   // 
+*/
+void protocol_read_axispins()
+{
+	uint8_t pinValue = 0;
+	int val = 0;
+	
+	val = digitalRead(xUpPin);
+	pinValue += val;
+	
+	val = digitalRead(xDownPin);
+	pinValue += ((val & 0x1)<<1);
+	
+	val = digitalRead(yUpPin);
+	pinValue += ((val & 0x1)<<2);
+	
+	val = digitalRead(yDownPin);
+	pinValue += ((val & 0x1)<<3);
+	
+	val = digitalRead(zUpPin);
+	pinValue += ((val & 0x1)<<4);
+	
+	val = digitalRead(zDownPin);
+	pinValue += ((val & 0x1)<<5);
+	
+	val = digitalRead(xySetPin);
+	pinValue += ((val & 0x1)<<6);
+	
+	val = digitalRead(zSetPin);
+	pinValue += ((val & 0x1)<<7);
+	
+	PrintMillsLCD(0, pinValue);
+}
+
+int protocol_read_axisxyz(float* x, float* y, float* z)
+{
+	uint8_t pinValue = 0;
+	int val = 0;
+	
+	val = digitalRead(xUpPin);
+	if(!val){
+		pinValue++;
+		*x = 1;
+	}
+	
+	val = digitalRead(xDownPin);
+	if(!val){
+		pinValue++;
+		*x = -1;
+	}
+	
+	val = digitalRead(yUpPin);
+	if(!val){
+		pinValue++;
+		*y = 1;
+	}
+	
+	val = digitalRead(yDownPin);
+	if(!val){
+		pinValue++;
+		*y = -1;
+	}
+	
+	val = digitalRead(zUpPin);
+	if(!val){
+		pinValue++;
+		*z = 1;
+	}
+	
+	val = digitalRead(zDownPin);
+	if(!val){
+		pinValue++;
+		*z = -1;
+	}
+	
+	return pinValue;
+}
+
+int protocol_read_axissetxy()
+{
+	int pinValue = 0;
+	int val = 0;
+	
+	val = digitalRead(xySetPin);
+	if(!val) 	pinValue = 1;
+	
+	return pinValue;
+}
+
+int protocol_read_axissetz()
+{
+	int pinValue = 0;
+	int val = 0;
+	
+	val = digitalRead(zSetPin);
+	if(!val) 	pinValue = 1;
+	
+	return pinValue;
+}
+//end added
 
 // Handles Grbl system suspend procedures, such as feed hold, safety door, and parking motion.
 // The system will enter this loop, create local variables for suspend tasks, and return to

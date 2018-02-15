@@ -171,6 +171,7 @@ typedef struct {
     uint8_t override_ctrl;     // Tracks override control states.
   #endif
   float spindle_speed;
+  int   sfeed_rate;
 } system_t;
 extern system_t sys;
 

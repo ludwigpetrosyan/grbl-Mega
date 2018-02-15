@@ -132,6 +132,16 @@
   #define SPINDLE_PWM_DDR		DDRH
   #define SPINDLE_PWM_PORT  PORTH
   #define SPINDLE_PWM_BIT		4 // MEGA2560 Digital Pin 7
+  
+  
+  #define xUpPin  53   // 
+  #define xDownPin  51   // 
+  #define yUpPin  49   // 
+  #define yDownPin  47   // 
+  #define zUpPin  45   // 
+  #define zDownPin  43   // 
+  #define xySetPin  41   // 
+  #define zSetPin  39   // 
 
 #endif
 

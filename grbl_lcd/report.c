@@ -454,35 +454,35 @@ void report_realtime_status()
   switch (sys.state) {
     case STATE_IDLE: 
 		printPgmString(PSTR("Idle")); 
-		PrintStatusLCD("Idle  ");
+		//PrintStatusLCD("Idle  ");
 		break;
     case STATE_CYCLE: 
 		printPgmString(PSTR("Run")); 
-		PrintStatusLCD("Run   ");
+		//PrintStatusLCD("Run   ");
 		break;
     case STATE_HOLD:
       if (!(sys.suspend & SUSPEND_JOG_CANCEL)) {
         printPgmString(PSTR("Hold:"));
         if (sys.suspend & SUSPEND_HOLD_COMPLETE) { serial_write('0'); } // Ready to resume
         else { serial_write('1'); } // Actively holding
-        PrintStatusLCD("Hold  ");
+        //PrintStatusLCD("Hold  ");
         break;
       } // Continues to print jog state during jog cancel.
     case STATE_JOG: 
 		printPgmString(PSTR("Jog")); 
-		PrintStatusLCD("Jog   ");
+		//PrintStatusLCD("Jog   ");
 		break;
     case STATE_HOMING: 
 		printPgmString(PSTR("Home")); 
-		PrintStatusLCD("Home  ");
+		//PrintStatusLCD("Home  ");
 		break;
     case STATE_ALARM: 
 		printPgmString(PSTR("Alarm")); 
-		PrintStatusLCD("Alarm ");
+		//PrintStatusLCD("Alarm ");
 		break;
     case STATE_CHECK_MODE: 
 		printPgmString(PSTR("Check")); 
-		PrintStatusLCD("Check ");
+		//PrintStatusLCD("Check ");
 		break;
     case STATE_SAFETY_DOOR:
       printPgmString(PSTR("Door:"));
@@ -499,11 +499,11 @@ void report_realtime_status()
           serial_write('2'); // Retracting
         }
       }
-      PrintStatusLCD("Door  ");
+      //PrintStatusLCD("Door  ");
       break;
     case STATE_SLEEP: 
 		printPgmString(PSTR("Sleep")); 
-		PrintStatusLCD("Sleep ");
+		//PrintStatusLCD("Sleep ");
 		break;
   }
 
@@ -523,9 +523,7 @@ void report_realtime_status()
   // Report machine position
   if (bit_istrue(settings.status_report_mask,BITFLAG_RT_STATUS_POSITION_TYPE)) {
     printPgmString(PSTR("|MPos:"));
-    PrintPosLCD((float)print_position[0], (float)print_position[1],(float)print_position[2]);
-    //PrintPosLCD(123.56, 25.45, 112.33);
-    //PrintPosLCDX((float)print_position[0]);
+    //PrintPosLCD((float)print_position[0], (float)print_position[1],(float)print_position[2]);
   } else {
     printPgmString(PSTR("|WPos:"));
     PrintPosLCD((float)print_position[0], (float)print_position[1],(float)print_position[2]);
@@ -533,8 +531,6 @@ void report_realtime_status()
   //PrintPosLCD((float)print_position[0], (float)print_position[1],(float)print_position[2]);
   report_util_axis_values(print_position);
    
-  //PrintPosLCD(123.56, 25.45, 112.33);
-
   // Returns planner and serial read buffer states.
   #ifdef REPORT_FIELD_BUFFER_STATE
     if (bit_istrue(settings.status_report_mask,BITFLAG_RT_STATUS_BUFFER_STATE)) {
@@ -564,9 +560,8 @@ void report_realtime_status()
     serial_write(',');
     printFloat(sys.spindle_speed,N_DECIMAL_RPMVALUE);
   #endif
-  PrintFeedLCD(st_get_realtime_rate());
-  //PrintPwmLCD(st_get_pwm_rate());
-  PrintSpindleLCD(sys.spindle_speed);
+  //PrintFeedLCD(st_get_realtime_rate());
+  //PrintSpindleLCD(sys.spindle_speed);
   
   
   
@@ -603,7 +598,7 @@ void report_realtime_status()
       if (sys.report_ovr_counter == 0) { sys.report_ovr_counter = 1; } // Set override on next report.
       printPgmString(PSTR("|WCO:"));
       report_util_axis_values(wco);
-      PrintWcoLCD(wco[0], wco[1],wco[2]);
+      //PrintWcoLCD(wco[0], wco[1],wco[2]);
     }
   #endif
 
@@ -645,3 +640,103 @@ void report_realtime_status()
 
   }
 #endif
+
+// Prints real-time data to LCD. This function grabs a real-time snapshot of the stepper subprogram
+ // and the actual location of the CNC machine. Users may change the following function to their
+ // specific needs, but the desired real-time data report must be as short as possible. This is
+ // requires as it minimizes the computational overhead and allows grbl to keep running smoothly,
+ // especially during g-code programs with fast, short line segments and high frequency reports (5-20Hz).
+void report_lcd_status()
+{
+  uint8_t idx;
+  int32_t current_position[N_AXIS]; // Copy current state of the system position variable
+  memcpy(current_position,sys_position,sizeof(sys_position));
+  float print_position[N_AXIS];
+  float wpos_position[N_AXIS];
+  system_convert_array_steps_to_mpos(print_position,current_position);
+
+  // Report current machine state and sub-states
+  switch (sys.state) {
+    case STATE_IDLE: 
+		PrintStatusLCD("Idle  ");
+		break;
+    case STATE_CYCLE: 
+		PrintStatusLCD("Run   ");
+		break;
+    case STATE_HOLD:
+      if (!(sys.suspend & SUSPEND_JOG_CANCEL)) {
+        PrintStatusLCD("Hold  ");
+        break;
+      } // Continues to print jog state during jog cancel.
+    case STATE_JOG: 
+		PrintStatusLCD("Jog   ");
+		break;
+    case STATE_HOMING: 
+		PrintStatusLCD("Home  ");
+		break;
+    case STATE_ALARM: 
+		PrintStatusLCD("Alarm ");
+		break;
+    case STATE_CHECK_MODE: 
+		PrintStatusLCD("Check ");
+		break;
+    case STATE_SAFETY_DOOR:
+      PrintStatusLCD("Door  ");
+      break;
+    case STATE_SLEEP: 
+		PrintStatusLCD("Sleep ");
+		break;
+  }
+
+  float wco[N_AXIS];
+  if (bit_isfalse(settings.status_report_mask,BITFLAG_RT_STATUS_POSITION_TYPE) ||
+      (sys.report_wco_counter == 0) ) {
+    for (idx=0; idx< N_AXIS; idx++) {
+      // Apply work coordinate offsets and tool length offset to current position.
+      wco[idx] = gc_state.coord_system[idx]+gc_state.coord_offset[idx];
+      if (idx == TOOL_LENGTH_OFFSET_AXIS) { wco[idx] += gc_state.tool_length_offset; }
+      wpos_position[idx] = print_position[idx] - wco[idx];
+      
+      //if (bit_isfalse(settings.status_report_mask,BITFLAG_RT_STATUS_POSITION_TYPE)) {
+      //  print_position[idx] -= wco[idx];
+      //}
+      
+    }
+  }
+
+  // Report machine position
+  //if (bit_istrue(settings.status_report_mask,BITFLAG_RT_STATUS_POSITION_TYPE)) {
+  //  PrintPosLCD((float)print_position[0], (float)print_position[1],(float)print_position[2]);
+  //} else {
+  //  PrintPosLCD((float)print_position[0], (float)print_position[1],(float)print_position[2]);
+  //}
+  
+  PrintPosLCD((float)wpos_position[0], (float)wpos_position[1],(float)wpos_position[2]);
+  PrintWcoLCD((float)print_position[0], (float)print_position[1],(float)print_position[2]);
+   
+  // Report realtime feed speed
+  PrintFeedLCD(st_get_realtime_rate());
+  //PrintPwmLCD(st_get_pwm_rate());
+  PrintSpindleLCD(sys.spindle_speed);
+  
+  #ifdef REPORT_FIELD_WORK_COORD_OFFSET
+	/*
+    if (sys.report_wco_counter > 0) { sys.report_wco_counter--; }
+    else {
+      if (sys.state & (STATE_HOMING | STATE_CYCLE | STATE_HOLD | STATE_JOG | STATE_SAFETY_DOOR)) {
+        sys.report_wco_counter = (REPORT_WCO_REFRESH_BUSY_COUNT-1); // Reset counter for slow refresh
+      } else { sys.report_wco_counter = (REPORT_WCO_REFRESH_IDLE_COUNT-1); }
+      if (sys.report_ovr_counter == 0) { sys.report_ovr_counter = 1; } // Set override on next report.
+      printPgmString(PSTR("|WCO:"));
+      report_util_axis_values(wco);
+      PrintWcoLCD(wco[0], wco[1],wco[2]);
+    }
+    */
+    if (sys.report_wco_counter == 0){
+		//PrintWcoLCD(wco[0], wco[1],wco[2]);
+	}
+  #endif
+  
+  PrintSfeedLCD(sys.sfeed_rate);
+
+}

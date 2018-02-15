@@ -33,6 +33,10 @@ volatile uint8_t sys_rt_exec_motion_override; // Global realtime executor bitfla
 volatile uint8_t sys_rt_exec_accessory_override; // Global realtime executor bitflag variable for spindle/coolant overrides.
 volatile uint8_t sys_rt_exec_axis;   // added Global realtime executor bitflag variable for axis movement.
 volatile uint8_t sys_rt_exec_position;   // added Global realtime executor bitflag variable for homing and zeroing.
+
+volatile uint8_t main_count;
+volatile uint8_t protocol_count;
+
 #ifdef DEBUG
   volatile uint8_t sys_rt_exec_debug;
 #endif
@@ -41,6 +45,19 @@ volatile uint8_t sys_rt_exec_position;   // added Global realtime executor bitfl
 int main(void)
 {
   // Initialize system upon power-up.
+  
+  //added
+  pinMode(xUpPin, INPUT_PULLUP);
+  pinMode(xDownPin, INPUT_PULLUP);
+  pinMode(yUpPin, INPUT_PULLUP);
+  pinMode(yDownPin, INPUT_PULLUP);
+  pinMode(zUpPin, INPUT_PULLUP);
+  pinMode(zDownPin, INPUT_PULLUP);
+  pinMode(xySetPin, INPUT_PULLUP);
+  pinMode(zSetPin, INPUT_PULLUP);
+  
+  
+  //end added
   serial_init();   // Setup serial baud rate and interrupts
   settings_init(); // Load Grbl settings from EEPROM
   stepper_init();  // Configure stepper pins and interrupt timers
@@ -73,10 +90,15 @@ int main(void)
    PrintPosLCD(000.00, 000.00, 000.00);
    PrintWcoLCD(000.00, 000.00, 000.00);
    
+   main_count = 0;
+   protocol_count = 0;
+   
   // Grbl initialization loop upon power-up or a system abort. For the latter, all processes
   // will return to this loop to be cleanly re-initialized.
   for(;;) {
 
+	main_count++;
+	//PrintMillsLCD(0, main_count);
     // Reset system variables.
     uint8_t prior_state = sys.state;
     memset(&sys, 0, sizeof(system_t)); // Clear system struct variable.
@@ -93,6 +115,11 @@ int main(void)
     
 	sys_rt_exec_axis  = 0;   // added
 	sys_rt_exec_position = 0;   // added
+	
+	sys.sfeed_rate = 250;
+
+
+	
 
     // Reset Grbl primary systems.
     serial_reset_read_buffer(); // Clear serial read buffer
