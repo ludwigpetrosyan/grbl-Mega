@@ -50,6 +50,8 @@ int protocol_read_axisxyz(float* x, float* y, float* z);
 int protocol_read_axissetxy();
 //added read digital pins for axis moving
 int protocol_read_axissetz();
+//added read digital pins for pwm settings
+int protocol_read_setpwm();
 
 
 extern volatile uint8_t protocol_count;

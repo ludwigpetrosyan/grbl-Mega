@@ -55,6 +55,7 @@ int main(void)
   pinMode(zDownPin, INPUT_PULLUP);
   pinMode(xySetPin, INPUT_PULLUP);
   pinMode(zSetPin, INPUT_PULLUP);
+  pinMode(pwmSetPin, INPUT_PULLUP);
   
   
   //end added
@@ -99,6 +100,8 @@ int main(void)
 
 	main_count++;
 	//PrintMillsLCD(0, main_count);
+        
+    memset(sys_position,0,sizeof(sys_position)); // Clear machine position.
     // Reset system variables.
     uint8_t prior_state = sys.state;
     memset(&sys, 0, sizeof(system_t)); // Clear system struct variable.
@@ -117,6 +120,8 @@ int main(void)
 	sys_rt_exec_position = 0;   // added
 	
 	sys.sfeed_rate = 250;
+        sys.cmd_count  = 0;
+        sys.cmd_count_enable = 0;
 
 
 	

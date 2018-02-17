@@ -48,8 +48,9 @@
 #define EXEC_Y_UPL  bit(6) // bitmask 01000000
 #define EXEC_XY_SET_ZERO         bit(7) // bitmask 10000000
 //sys_rt_exec_position = 0;   // added
-#define EXEC_GO_HOME  bit(0) // bitmask 00000001
+#define EXEC_GO_HOME     bit(0) // bitmask 00000001
 #define EXEC_SET_ZERO    bit(1) // bitmask 00000010
+#define EXEC_SET_SPINDLE bit(2) // bitmask 00000100
 
 
 // Alarm executor codes. Valid values (1-255). Zero is reserved.
@@ -137,8 +138,9 @@
 #define EXEC_SET_ZERO    bit(1) // bitmask 00000010
 #define CONTROL_PIN_INDEX_GO_HOME   bit(4) //added
 */
-#define CONTROL_PIN_INDEX_GO_HOME   bit(4) //port DDRK pin 11
-#define CONTROL_PIN_INDEX_SET_ZERO   bit(5) //port DDRK pin 11
+#define CONTROL_PIN_INDEX_GO_HOME     bit(4) //port DDRK pin 11
+#define CONTROL_PIN_INDEX_SET_ZERO    bit(5) //port DDRK pin 11
+#define CONTROL_PIN_INDEX_SET_SPINDLE bit(6) //port DDRK pin 11
 
 // Define spindle stop override control states.
 #define SPINDLE_STOP_OVR_DISABLED       0  // Must be zero.
@@ -147,7 +149,7 @@
 #define SPINDLE_STOP_OVR_RESTORE        bit(2)
 #define SPINDLE_STOP_OVR_RESTORE_CYCLE  bit(3)
 
-
+#define CMD_COUNT_MAX 25
 // Define global system variables
 typedef struct {
   uint8_t state;               // Tracks the current system state of Grbl.
@@ -172,6 +174,8 @@ typedef struct {
   #endif
   float spindle_speed;
   int   sfeed_rate;
+  int   cmd_count;
+  int   cmd_count_enable;
 } system_t;
 extern system_t sys;
 

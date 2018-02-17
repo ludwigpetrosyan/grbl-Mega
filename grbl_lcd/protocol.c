@@ -168,13 +168,23 @@ void protocol_main_loop()
     }
     if(c == SERIAL_NO_DATA){
 		//added
-		  rt_exec_m = sys_rt_exec_axis; // Copy volatile sys_rt_exec_alarm.
-		  if (rt_exec_m) {
-			   if (sys.state != STATE_HOLD){
-						PrintComandLCD("AXIS");
-			   } 
-			   //system_clear_exec_axis_flag(uint8_t mask);
-		   }
+        
+        if(sys.cmd_count_enable){
+            sys.cmd_count++;
+            if(sys.cmd_count == CMD_COUNT_MAX){
+                sys.cmd_count = 0;
+                sys.cmd_count_enable = 0;
+            }
+            //PrintComandCountLCD(sys.cmd_count);
+        }
+             
+                rt_exec_m = sys_rt_exec_axis; // Copy volatile sys_rt_exec_alarm.
+                if (rt_exec_m) {
+                   if (sys.state != STATE_HOLD){
+                                        PrintComandLCD("AXIS");
+                   } 
+                   //system_clear_exec_axis_flag(uint8_t mask);
+                }
 		  
 		  
 		  rt_exec_m = sys_rt_exec_position; // Copy volatile sys_rt_exec_alarm.
@@ -186,10 +196,29 @@ void protocol_main_loop()
 						system_clear_exec_position_flag(EXEC_GO_HOME);
 					}
 					 if (rt_exec_m & EXEC_SET_ZERO){
+                                            if(!sys.cmd_count){
 						PrintComandLCD("SFEED");
-						//report_status_message(gc_execute_line( "G92X0Y0Z0"));
 						if(sys.sfeed_rate == 250) sys.sfeed_rate = 50; else sys.sfeed_rate += 50;
+                                                sys.cmd_count_enable = 1;
+                                            }
 						system_clear_exec_position_flag(EXEC_SET_ZERO);
+					}
+                                        if (rt_exec_m & EXEC_SET_SPINDLE){
+                                                //uint8_t sp_state = spindle_get_state();
+                                                //cmd_count;
+                                                //cmd_count_enable;
+                                                //CMD_COUNT_MAX
+                                            if(!sys.cmd_count){
+                                                if(spindle_get_state()){ 
+                                                    PrintComandLCD("SPON  ");
+                                                    report_status_message(gc_execute_line( "M5S0"));
+                                                }else {
+                                                    PrintComandLCD("SPOFF ");
+                                                    report_status_message(gc_execute_line( "M3S30000"));
+                                                }
+                                                sys.cmd_count_enable = 1;
+                                            }
+                                            system_clear_exec_position_flag(EXEC_SET_SPINDLE);
 					}
 				} 
 			  
@@ -742,6 +771,17 @@ int protocol_read_axissetz()
 	int val = 0;
 	
 	val = digitalRead(zSetPin);
+	if(!val) 	pinValue = 1;
+	
+	return pinValue;
+}
+
+int protocol_read_setpwm()
+{
+	int pinValue = 0;
+	int val = 0;
+	
+	val = digitalRead(pwmSetPin);
 	if(!val) 	pinValue = 1;
 	
 	return pinValue;

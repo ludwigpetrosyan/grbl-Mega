@@ -90,17 +90,18 @@
   #define CONTROL_DDR       DDRK
   #define CONTROL_PIN       PINK
   #define CONTROL_PORT      PORTK
-  #define CONTROL_RESET_BIT                0  // MEGA2560 Analog Pin 8
+  #define CONTROL_RESET_BIT           0  // MEGA2560 Analog Pin 8
   #define CONTROL_FEED_HOLD_BIT       1  // MEGA2560 Analog Pin 9
   #define CONTROL_CYCLE_START_BIT     2  // MEGA2560 Analog Pin 10
-  #define CONTROL_SAFETY_DOOR_BIT   3  // MEGA2560 Analog Pin 11
-  #define CONTROL_GO_HOME_BIT          4  // MEGA2560 Analog Pin 12
+  #define CONTROL_SAFETY_DOOR_BIT     3  // MEGA2560 Analog Pin 11
+  #define CONTROL_GO_HOME_BIT         4  // MEGA2560 Analog Pin 12
   #define CONTROL_SET_ZERO_BIT        5  // MEGA2560 Analog Pin 13
+  #define CONTROL_SET_SPINDLE_BIT     6  // MEGA2560 Analog Pin 14
   #define CONTROL_INT       PCIE2  // Pin change interrupt enable pin
   #define CONTROL_INT_vect  PCINT2_vect
   #define CONTROL_PCMSK     PCMSK2 // Pin change interrupt register
  // #define CONTROL_MASK      ((1<<CONTROL_RESET_BIT)|(1<<CONTROL_FEED_HOLD_BIT)|(1<<CONTROL_CYCLE_START_BIT)|(1<<CONTROL_SAFETY_DOOR_BIT))
-   #define CONTROL_MASK      ((1<<CONTROL_RESET_BIT)|(1<<CONTROL_FEED_HOLD_BIT)|(1<<CONTROL_CYCLE_START_BIT)|(1<<CONTROL_SAFETY_DOOR_BIT)|(1<<CONTROL_GO_HOME_BIT)|(1<<CONTROL_SET_ZERO_BIT)) //added 
+   #define CONTROL_MASK      ((1<<CONTROL_RESET_BIT)|(1<<CONTROL_FEED_HOLD_BIT)|(1<<CONTROL_CYCLE_START_BIT)|(1<<CONTROL_SAFETY_DOOR_BIT)|(1<<CONTROL_GO_HOME_BIT)|(1<<CONTROL_SET_ZERO_BIT)|(1<<CONTROL_SET_SPINDLE_BIT)) //added 
 
   // Define probe switch input pin.
   #define PROBE_DDR       DDRK
@@ -134,14 +135,44 @@
   #define SPINDLE_PWM_BIT		4 // MEGA2560 Digital Pin 7
   
   
-  #define xUpPin  53   // 
-  #define xDownPin  51   // 
-  #define yUpPin  49   // 
-  #define yDownPin  47   // 
-  #define zUpPin  45   // 
-  #define zDownPin  43   // 
-  #define xySetPin  41   // 
-  #define zSetPin  39   // 
+  #define xUpPin     53   // 
+  #define xDownPin   51   // 
+  #define yUpPin     49   // 
+  #define yDownPin   47   // 
+  #define zUpPin     45   // 
+  #define zDownPin   43   // 
+  #define xySetPin   41   // 
+  #define zSetPin    39   // 
+  #define pwmSetPin  37   // 
+
+    /* 
+     * pins used for LCD
+     * rs = 52, 
+     * rw = 50, 
+     * en = 48, 
+     * d4 = 46, 
+     * d5 = 44, 
+     * d6 = 42, 
+     * d7 = 40; 
+     * 
+     * pins used by grbl
+     * step pulse X = 24
+     * step pulse Y = 25
+     * step pilse Z = 26
+     * direction  X = 30
+     * direction  Y = 31
+     * direction  Z = 32
+     * reset  = A8
+     * hold   = A9
+     * start  = A10
+     * door   = A11
+     * probe  = A15
+     * 
+     * added
+     * home   = A12  
+     * feed   = A13
+     * spindle on/off = A14 //to do
+     */
 
 #endif
 

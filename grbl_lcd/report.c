@@ -689,6 +689,8 @@ void report_lcd_status()
   }
 
   float wco[N_AXIS];
+  
+  /*
   if (bit_isfalse(settings.status_report_mask,BITFLAG_RT_STATUS_POSITION_TYPE) ||
       (sys.report_wco_counter == 0) ) {
     for (idx=0; idx< N_AXIS; idx++) {
@@ -696,20 +698,37 @@ void report_lcd_status()
       wco[idx] = gc_state.coord_system[idx]+gc_state.coord_offset[idx];
       if (idx == TOOL_LENGTH_OFFSET_AXIS) { wco[idx] += gc_state.tool_length_offset; }
       wpos_position[idx] = print_position[idx] - wco[idx];
-      
-      //if (bit_isfalse(settings.status_report_mask,BITFLAG_RT_STATUS_POSITION_TYPE)) {
-      //  print_position[idx] -= wco[idx];
-      //}
-      
     }
   }
+  */
+  
+  
+  /*
+   * If WPos: is given, use MPos = WPos + WCO.
+   * If MPos: is given, use WPos = MPos - WCO.
+   */
+  
+  //PrintComandCountLCD(55);
+  if (bit_isfalse(settings.status_report_mask,BITFLAG_RT_STATUS_POSITION_TYPE)) {
+    //WPos status report
+    //PrintComandCountLCD(22);
+/*
+    for (idx=0; idx< N_AXIS; idx++) {
+      // Apply work coordinate offsets and tool length offset to current position.
+      wco[idx] = gc_state.coord_system[idx]+gc_state.coord_offset[idx];
+      if (idx == TOOL_LENGTH_OFFSET_AXIS) { wco[idx] += gc_state.tool_length_offset; }
+      wpos_position[idx] = print_position[idx] - wco[idx];
+    }
+*/
+  }
+  
+  for (idx=0; idx< N_AXIS; idx++) {
+      // Apply work coordinate offsets and tool length offset to current position.
+      wco[idx] = gc_state.coord_system[idx]+gc_state.coord_offset[idx];
+      if (idx == TOOL_LENGTH_OFFSET_AXIS) { wco[idx] += gc_state.tool_length_offset; }
+      wpos_position[idx] = print_position[idx] - wco[idx];
+    }
 
-  // Report machine position
-  //if (bit_istrue(settings.status_report_mask,BITFLAG_RT_STATUS_POSITION_TYPE)) {
-  //  PrintPosLCD((float)print_position[0], (float)print_position[1],(float)print_position[2]);
-  //} else {
-  //  PrintPosLCD((float)print_position[0], (float)print_position[1],(float)print_position[2]);
-  //}
   
   PrintPosLCD((float)wpos_position[0], (float)wpos_position[1],(float)wpos_position[2]);
   PrintWcoLCD((float)print_position[0], (float)print_position[1],(float)print_position[2]);
