@@ -96,6 +96,45 @@ void PrintComandCountLCD(int cnt)
     lcd.print(str);
 }
 
+void PrintComandWcoLCD(float x, float y, float z)
+{
+    lcd.setCursor(0, 3);
+    lcd.print(x);
+    lcd.setCursor(3, 3);
+    lcd.print(" ");
+    lcd.setCursor(4, 3);
+    lcd.print(y);
+    lcd.setCursor(7, 3);
+    lcd.print(" ");
+    lcd.setCursor(8, 3);
+    lcd.print(z);
+}
+
+void PrintFStepLCD(int idx){
+    lcd.setCursor(9, 3);
+    lcd.print("STP:");
+    lcd.setCursor(10, 3);
+    lcd.print(idx);
+}
+
+void PrintStepLCD(int idx)
+{
+    lcd.setCursor(0, 3);
+    lcd.print("STP:");
+    lcd.setCursor(4, 3);
+    switch (idx){
+        case 0:
+            lcd.print("0.01");
+            break;
+        case 1:
+            lcd.print("0.10");
+            break;
+        case 2:
+            lcd.print("1.00");
+            break;
+    }
+}
+
  void PrintLCD(double pos)
 {
 	lcd.print(pos);

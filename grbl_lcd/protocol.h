@@ -52,7 +52,12 @@ int protocol_read_axissetxy();
 int protocol_read_axissetz();
 //added read digital pins for pwm settings
 int protocol_read_setpwm();
+//added read digital pins for pwm settings
+int protocol_read_setstep();
+//added read digital pins for pwm settings
+int protocol_read_xyzhome();
 
+extern volatile uint8_t step_per_click;
 
 extern volatile uint8_t protocol_count;
 #endif

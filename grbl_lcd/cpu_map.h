@@ -135,25 +135,28 @@
   #define SPINDLE_PWM_BIT		4 // MEGA2560 Digital Pin 7
   
   
-  #define xUpPin     53   // 
-  #define xDownPin   51   // 
-  #define yUpPin     49   // 
-  #define yDownPin   47   // 
-  #define zUpPin     45   // 
-  #define zDownPin   43   // 
-  #define xySetPin   41   // 
-  #define zSetPin    39   // 
-  #define pwmSetPin  37   // 
+  #define xUpPin     53 //45   // 
+  #define xDownPin   51 //44   // 
+  #define yUpPin     49 //43   // 
+  #define yDownPin   47 //42   // 
+  #define zUpPin     45 //41   // 
+  #define zDownPin   43 //40   // 
+  #define xySetPin   41 //39   // 
+  #define zSetPin    39 //38   // 
+  #define StepSetPin 38 //37   //
+  #define pwmSetPin  36 //36   //
+  #define zHometPin  35 //36   //
+  #define xyHomePin  37 //36   //
 
     /* 
      * pins used for LCD
-     * rs = 52, 
-     * rw = 50, 
-     * en = 48, 
-     * d4 = 46, 
-     * d5 = 44, 
-     * d6 = 42, 
-     * d7 = 40; 
+     * rs = 53, 52
+     * rw = 52, 50
+     * en = 51, 48
+     * d4 = 50, 46
+     * d5 = 49, 44
+     * d6 = 48, 42
+     * d7 = 47; 40
      * 
      * pins used by grbl
      * step pulse X = 24
@@ -171,7 +174,7 @@
      * added
      * home   = A12  
      * feed   = A13
-     * spindle on/off = A14 //to do
+     * spindle on/off = A14 
      */
 
 #endif

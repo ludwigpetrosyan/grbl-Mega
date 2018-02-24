@@ -173,6 +173,7 @@ typedef struct {
     uint8_t override_ctrl;     // Tracks override control states.
   #endif
   float spindle_speed;
+  //float step_per_click;
   int   sfeed_rate;
   int   cmd_count;
   int   cmd_count_enable;

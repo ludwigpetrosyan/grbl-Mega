@@ -52,6 +52,8 @@ void protocol_main_loop()
   if (sys.state & (STATE_ALARM | STATE_SLEEP)) {
     report_feedback_message(MESSAGE_ALARM_LOCK);
     sys.state = STATE_ALARM; // Ensure alarm state is set.
+    //PrintComandLCD("ALARM "); //added
+    PrintStatusLCD("ALARM "); //added
   } else {
     // Check if the safety door is open.
     sys.state = STATE_IDLE;
@@ -72,17 +74,14 @@ void protocol_main_loop()
   uint8_t char_counter = 0;
   uint8_t c;
   
-  //added
-  float pin_x = 0.0;
-  float pin_y = 0.0;
-  float pin_z = 0.0;
-  int pin_pressed = 0;
-  
-  //char* axis_move_buttons = "G91G0X+0.01Y+0.01Z+0.01:G90";
-  //sfeed positio is 24
-  char* axis_move_buttons = "G91G1X+0.01Y+0.01Z+0.01F250";
-  
-  //end added
+    //added
+    float pin_x = 0.0;
+    float pin_y = 0.0;
+    float pin_z = 0.0;
+    int   pin_pressed = 0;
+    char* axis_move_buttons = "G91G1X+0.01Y+0.01Z+0.01F250"; 
+
+    //end added
   for (;;) {
 
 	uint8_t rt_exec_m = 0; // Temp variable to avoid calling volatile multiple times.
@@ -123,6 +122,10 @@ void protocol_main_loop()
         // Reset tracking data for next line.
         line_flags = 0;
         char_counter = 0;
+        
+        // added , seems in case of fast serial data no LCD status reported, will try to put it here
+        report_lcd_status();
+        // end added
 
       } else {
 
@@ -166,131 +169,230 @@ void protocol_main_loop()
 
       }
     }
+    //added
     if(c == SERIAL_NO_DATA){
-		//added
-        
         if(sys.cmd_count_enable){
             sys.cmd_count++;
             if(sys.cmd_count == CMD_COUNT_MAX){
                 sys.cmd_count = 0;
                 sys.cmd_count_enable = 0;
             }
-            //PrintComandCountLCD(sys.cmd_count);
         }
-             
-                rt_exec_m = sys_rt_exec_axis; // Copy volatile sys_rt_exec_alarm.
-                if (rt_exec_m) {
-                   if (sys.state != STATE_HOLD){
-                                        PrintComandLCD("AXIS");
-                   } 
-                   //system_clear_exec_axis_flag(uint8_t mask);
+          
+        /* seems I do not use it more, let comment for time
+        rt_exec_m = sys_rt_exec_axis; // Copy volatile sys_rt_exec_alarm.
+        if (rt_exec_m) {
+           if (sys.state != STATE_HOLD){
+                                PrintComandLCD("AXIS");
+           } 
+        }
+        */
+        //PrintComandLCD("      ");
+        rt_exec_m = sys_rt_exec_position; // Copy volatile sys_rt_exec_alarm.
+        if (rt_exec_m) {
+            if (sys.state != STATE_HOLD){
+                if (rt_exec_m & EXEC_GO_HOME){
+                    //PrintComandLCD("HOME");
+                    //report_status_message(gc_execute_line( "G90G0X0Y0Z0"));
+                    
+                    report_status_message(gc_execute_line("G90G0Z5"));
+					report_status_message(gc_execute_line("G0X0Y0"));
+					report_status_message(gc_execute_line("G90G1Z0F25"));
+											
+                    system_clear_exec_position_flag(EXEC_GO_HOME);
                 }
-		  
-		  
-		  rt_exec_m = sys_rt_exec_position; // Copy volatile sys_rt_exec_alarm.
-		  if (rt_exec_m) {
-			  if (sys.state != STATE_HOLD){
-					if (rt_exec_m & EXEC_GO_HOME){
-						PrintComandLCD("HOME");
-						report_status_message(gc_execute_line( "G90G0X0Y0Z0"));
-						system_clear_exec_position_flag(EXEC_GO_HOME);
+                if (rt_exec_m & EXEC_SET_ZERO){
+					//PrintComandLCD("SFEED");
+					if(sys.sfeed_rate == 250) sys.sfeed_rate = 50; else sys.sfeed_rate += 50;
+					system_clear_exec_position_flag(EXEC_SET_ZERO);
+                }
+                if (rt_exec_m & EXEC_SET_SPINDLE){
+					if(spindle_get_state()){ 
+						//PrintComandLCD("SPON  ");
+						report_status_message(gc_execute_line( "M5S0"));
+					}else {
+						//PrintComandLCD("SPOFF ");
+						report_status_message(gc_execute_line( "M3S30000"));
 					}
-					 if (rt_exec_m & EXEC_SET_ZERO){
-                                            if(!sys.cmd_count){
-						PrintComandLCD("SFEED");
-						if(sys.sfeed_rate == 250) sys.sfeed_rate = 50; else sys.sfeed_rate += 50;
-                                                sys.cmd_count_enable = 1;
-                                            }
-						system_clear_exec_position_flag(EXEC_SET_ZERO);
-					}
-                                        if (rt_exec_m & EXEC_SET_SPINDLE){
-                                                //uint8_t sp_state = spindle_get_state();
-                                                //cmd_count;
-                                                //cmd_count_enable;
-                                                //CMD_COUNT_MAX
-                                            if(!sys.cmd_count){
-                                                if(spindle_get_state()){ 
-                                                    PrintComandLCD("SPON  ");
-                                                    report_status_message(gc_execute_line( "M5S0"));
-                                                }else {
-                                                    PrintComandLCD("SPOFF ");
-                                                    report_status_message(gc_execute_line( "M3S30000"));
-                                                }
-                                                sys.cmd_count_enable = 1;
-                                            }
-                                            system_clear_exec_position_flag(EXEC_SET_SPINDLE);
-					}
-				} 
-			  
-		}
-		//protocol_read_axispins();
-		pin_x = 0.0;
-		pin_y = 0.0;
-		pin_z = 0.0;
-		pin_pressed = 0;
-		pin_pressed = protocol_read_axisxyz(&pin_x, &pin_y, &pin_z);
-		//PrintMillsLCD(0, pin_pressed);
-		//PrintXyzPinsLCD(2, pin_x);
-		//PrintXyzPinsLCD(4, pin_y);
-		//PrintXyzPinsLCD(6, pin_z);
-		if(pin_pressed){
-			//axis_move_buttons
-			if(pin_x < 0) axis_move_buttons[6] = '-'; else axis_move_buttons[6] = '+';
-			if(pin_y < 0) axis_move_buttons[12] = '-'; else axis_move_buttons[12] = '+';
-			if(pin_z < 0) axis_move_buttons[18] = '-'; else axis_move_buttons[18] = '+';
-			if(!pin_x) axis_move_buttons[10] = '0'; else axis_move_buttons[10] = '1';
-			if(!pin_y) axis_move_buttons[16] = '0'; else axis_move_buttons[16] = '1';
-			if(!pin_z) axis_move_buttons[22] = '0'; else axis_move_buttons[22] = '1';
-			axis_move_buttons[24] = '0';
-			switch (sys.sfeed_rate){
-				case 50:
-					axis_move_buttons[24] = '0';
-					axis_move_buttons[25] = '5';
-					axis_move_buttons[26] = '0';
-					break;
-				case 100:
-					axis_move_buttons[24] = '1';
-					axis_move_buttons[25] = '0';
-					axis_move_buttons[26] = '0';
-					break;
-				case 150:
-					axis_move_buttons[24] = '1';
-					axis_move_buttons[25] = '5';
-					axis_move_buttons[26] = '0';
-					break;
-				case 200:
-					axis_move_buttons[24] = '2';
-					axis_move_buttons[25] = '0';
-					axis_move_buttons[26] = '0';
-					break;
-				case 250:
-					axis_move_buttons[24] = '2';
-					axis_move_buttons[25] = '5';
-					axis_move_buttons[26] = '0';
-					break;
-			}
-			//PrintComandLCD(&axis_move_buttons[22]);
-			report_status_message(gc_execute_line(axis_move_buttons));
-		}else{
-			pin_pressed = protocol_read_axissetxy();
+                    system_clear_exec_position_flag(EXEC_SET_SPINDLE);
+                }
+            } 
+        }
+        
+        if(!sys.cmd_count){
+			//protocol_read_axispins();
+			pin_x = 0.0;
+			pin_y = 0.0;
+			pin_z = 0.0;
+			pin_pressed = 0;
+			pin_pressed = protocol_read_axisxyz(&pin_x, &pin_y, &pin_z);
 			if(pin_pressed){
-				report_status_message(gc_execute_line("G92X0Y0"));
+				//axis_move_buttons  "G91G1X+0.01Y+0.01Z+0.01F250"; 
+				if(pin_x < 0) axis_move_buttons[6]  = '-'; else axis_move_buttons[6] = '+';
+				if(pin_y < 0) axis_move_buttons[12] = '-'; else axis_move_buttons[12] = '+';
+				if(pin_z < 0) axis_move_buttons[18] = '-'; else axis_move_buttons[18] = '+';
+				if(!pin_x){ 
+					axis_move_buttons[7]  = '0';
+					axis_move_buttons[9]  = '0';
+					axis_move_buttons[10] = '0';
+				}else{
+					switch(step_per_click){
+						case 0:
+							axis_move_buttons[7]  = '0';
+							axis_move_buttons[9]  = '0';
+							axis_move_buttons[10] = '1';
+							break;
+						case 1:
+							axis_move_buttons[7]  = '0';
+							axis_move_buttons[9]  = '1';
+							axis_move_buttons[10] = '0';
+							break;
+						case 2:
+							axis_move_buttons[7]  = '1';
+							axis_move_buttons[9]  = '0';
+							axis_move_buttons[10] = '0';
+							break;
+					}
+					
+					 //axis_move_buttons[10] = '1';
+				}
+				if(!pin_y){
+					axis_move_buttons[13] = '0';
+					axis_move_buttons[15] = '0';
+					axis_move_buttons[16] = '0';
+				 }else{
+					switch(step_per_click){
+						case 0:
+						    axis_move_buttons[13] = '0';
+							axis_move_buttons[15] = '0';
+							axis_move_buttons[16] = '1';
+							break;
+						case 1:
+							axis_move_buttons[13] = '0';
+							axis_move_buttons[15] = '1';
+							axis_move_buttons[16] = '0';
+							break;
+						case 2:
+							axis_move_buttons[13] = '1';
+							axis_move_buttons[15] = '0';
+							axis_move_buttons[16] = '0';
+							break;
+					}
+					 //axis_move_buttons[16] = '1';
+				 }
+				if(!pin_z){
+					axis_move_buttons[19] = '0';
+					axis_move_buttons[21] = '0';
+					axis_move_buttons[22] = '0';
+				 }else{
+					switch(step_per_click){
+						case 0:
+							axis_move_buttons[19] = '0';
+							axis_move_buttons[21] = '0';
+							axis_move_buttons[22] = '1';
+							break;
+						case 1:
+							axis_move_buttons[19] = '0';
+							axis_move_buttons[21] = '1';
+							axis_move_buttons[22] = '0';
+							break;
+						case 2:
+							axis_move_buttons[19] = '1';
+							axis_move_buttons[21] = '0';
+							axis_move_buttons[22] = '0';
+							break;
+					}
+					 //axis_move_buttons[22] = '1';
+				 }
+				axis_move_buttons[24] = '0';
+				switch (sys.sfeed_rate){
+					case 50:
+							axis_move_buttons[24] = '0';
+							axis_move_buttons[25] = '5';
+							axis_move_buttons[26] = '0';
+							break;
+					case 100:
+							axis_move_buttons[24] = '1';
+							axis_move_buttons[25] = '0';
+							axis_move_buttons[26] = '0';
+							break;
+					case 150:
+							axis_move_buttons[24] = '1';
+							axis_move_buttons[25] = '5';
+							axis_move_buttons[26] = '0';
+							break;
+					case 200:
+							axis_move_buttons[24] = '2';
+							axis_move_buttons[25] = '0';
+							axis_move_buttons[26] = '0';
+							break;
+					case 250:
+							axis_move_buttons[24] = '2';
+							axis_move_buttons[25] = '5';
+							axis_move_buttons[26] = '0';
+							break;
+				}
+				
+				//PrintComandLCD(&axis_move_buttons[6]);
+				report_status_message(gc_execute_line(axis_move_buttons));
 			}else{
-				pin_pressed = protocol_read_axissetz();
+				pin_pressed = protocol_read_axissetxy();
+				if(pin_pressed){
+					report_status_message(gc_execute_line("G92X0Y0"));
+				}else{
+					pin_pressed = protocol_read_axissetz();
 					if(pin_pressed){
-					report_status_message(gc_execute_line("G92Z0"));
+						report_status_message(gc_execute_line("G92Z0"));
+					}else{
+						pin_pressed = protocol_read_setstep();
+						if(pin_pressed){
+							if(step_per_click >= 2){
+								step_per_click = 0;
+							}else{
+								step_per_click += 1;
+							}
+							PrintStepLCD(step_per_click);
+							//PrintFStepLCD(step_per_click);
+						}else{
+							pin_pressed = protocol_read_setpwm();
+							if(pin_pressed){
+								PrintComandLCD("PWM");
+							}else{
+								pin_pressed = protocol_read_xyzhome();
+								if(pin_pressed){
+									switch (pin_pressed){
+										case 1:
+											report_status_message(gc_execute_line("G90G1Z0F25"));
+											//PrintComandLCD("ZHOME");
+											break;
+										case 2:
+											report_status_message(gc_execute_line("G90G0Z5"));
+											report_status_message(gc_execute_line("G90G0X0Y0"));
+											//PrintComandLCD("XYHOME");
+											break;
+										case 3:
+											report_status_message(gc_execute_line("G90G0Z5"));
+											report_status_message(gc_execute_line("G0X0Y0"));
+											report_status_message(gc_execute_line("G90G1Z0F25"));
+											//PrintComandLCD("XYZHOM");
+											break;
+									}
+								}
+							}
+						}
+					}
 				}
 			}
+			sys.cmd_count_enable = 1;
 		}
-			
-		  //end added
-	}
-
+    }
+    //end added
+        
     // If there are no more characters in the serial read buffer to be processed and executed,
     // this indicates that g-code streaming has either filled the planner buffer or has
     // completed. In either case, auto-cycle start, if enabled, any queued moves.
     protocol_auto_cycle_start();
-
+    
     protocol_execute_realtime();  // Runtime command check point.
     
     //Print status to LCD
@@ -357,6 +459,8 @@ void protocol_execute_realtime()
 // NOTE: Do not alter this unless you know exactly what you are doing!
 void protocol_exec_rt_system()
 {
+  uint8_t rt_exec_m = 0; // added
+  
   uint8_t rt_exec; // Temp variable to avoid calling volatile multiple times.
   rt_exec = sys_rt_exec_alarm; // Copy volatile sys_rt_exec_alarm.
   if (rt_exec) { // Enter only if any bit flag is true
@@ -385,7 +489,8 @@ void protocol_exec_rt_system()
 
     // Execute system abort.
     if (rt_exec & EXEC_RESET) {
-		PrintComandLCD("RESET ");
+      //PrintComandLCD("RESET ");
+      PrintStatusLCD("RESET");
       sys.abort = true;  // Only place this is set true.
       return; // Nothing else to do but exit.
     }
@@ -622,37 +727,37 @@ void protocol_exec_rt_system()
     }
   }
   
+  
+  //added 
   /*
-  //added
-  rt_exec = sys_rt_exec_axis; // Copy volatile sys_rt_exec_alarm.
-  if (rt_exec) {
-	   if (sys.state != STATE_HOLD){
-				PrintComandLCD("AXIS");
-	   } 
-	   //system_clear_exec_axis_flag(uint8_t mask);
-}
-  
-  
-  rt_exec = sys_rt_exec_position; // Copy volatile sys_rt_exec_alarm.
-  if (rt_exec) {
-	  if (sys.state != STATE_HOLD){
-		    if (rt_exec & EXEC_GO_HOME){
-				PrintComandLCD("HOME");
-				//report_status_message(system_execute_line( "<H"));
-				report_status_message(gc_execute_line( "G0X0Y0Z0"));
-				system_clear_exec_position_flag(EXEC_GO_HOME);
-			}
-			 if (rt_exec & EXEC_SET_ZERO){
-				PrintComandLCD("ZERO");
-				//report_status_message(gc_execute_line( "G92X0Y0Z0"));
-				system_clear_exec_position_flag(EXEC_SET_ZERO);
-			}
-		} 
-	  
-}
-  //end added
+  rt_exec_m = sys_rt_exec_position; // Copy volatile sys_rt_exec_alarm.
+        if (rt_exec_m) {
+            if (sys.state != STATE_HOLD){
+                if (rt_exec_m & EXEC_GO_HOME){
+                    //PrintComandLCD("HOME");
+                    report_status_message(gc_execute_line( "G90G0X0Y0Z0"));
+                    system_clear_exec_position_flag(EXEC_GO_HOME);
+                }
+                 if (rt_exec_m & EXEC_SET_ZERO){
+					//PrintComandLCD("SFEED");
+					if(sys.sfeed_rate == 250) sys.sfeed_rate = 50; else sys.sfeed_rate += 50;
+					system_clear_exec_position_flag(EXEC_SET_ZERO);
+                }
+                if (rt_exec_m & EXEC_SET_SPINDLE){
+					if(spindle_get_state()){ 
+						//PrintComandLCD("SPON  ");
+						report_status_message(gc_execute_line( "M5S0"));
+					}else {
+						//PrintComandLCD("SPOFF ");
+						report_status_message(gc_execute_line( "M3S30000"));
+					}
+                    system_clear_exec_position_flag(EXEC_SET_SPINDLE);
+                }
+            } 
+        }
   */
-
+  //end added
+  
   #ifdef DEBUG
     if (sys_rt_exec_debug) {
       report_realtime_debug();
@@ -707,7 +812,7 @@ void protocol_read_axispins()
 	val = digitalRead(zSetPin);
 	pinValue += ((val & 0x1)<<7);
 	
-	PrintMillsLCD(0, pinValue);
+	//PrintMillsLCD(0, pinValue);
 }
 
 int protocol_read_axisxyz(float* x, float* y, float* z)
@@ -786,6 +891,37 @@ int protocol_read_setpwm()
 	
 	return pinValue;
 }
+
+int protocol_read_setstep()
+{
+	int pinValue = 0;
+	int val = 0;
+	
+	val = digitalRead(StepSetPin);
+	if(!val) 	pinValue = 1;
+	
+	return pinValue;
+}
+
+int protocol_read_xyzhome()
+{
+	int pinValue = 0;
+	int val = 0;
+	int val1 = 0;
+	
+	val = digitalRead(xyHomePin);
+	if(!val){
+		pinValue = 1;
+	}
+	val1 = digitalRead(zHometPin);
+	if(!val1){
+		pinValue = 2;
+		if(!val) pinValue = 3;
+	}
+	
+	return pinValue;
+}
+
 //end added
 
 // Handles Grbl system suspend procedures, such as feed hold, safety door, and parking motion.

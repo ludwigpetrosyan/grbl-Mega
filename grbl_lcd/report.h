@@ -126,6 +126,7 @@ void report_build_info(char *line);
 
 // Prints realtime status to LCD
 void report_lcd_status();
+void report_lcd_status_fast();
 
 #ifdef DEBUG
   void report_realtime_debug();
