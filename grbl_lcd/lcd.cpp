@@ -15,8 +15,11 @@
 //const int rs = 22, en = 24, d4 = 26, d5 = 28, d6 = 30, d7 = 32;
 //LiquidCrystal lcd(rs, en, d4, d5, d6, d7);
 
-const int rs = 52, rw = 50, en = 48, d4 = 46, d5 = 44, d6 = 42, d7 = 40;
-LiquidCrystal lcd(rs, rw, en, d4, d5, d6, d7);
+//const int rs = 52, rw = 50, en = 48, d4 = 46, d5 = 44, d6 = 42, d7 = 40;
+//LiquidCrystal lcd(rs, rw, en, d4, d5, d6, d7);
+
+const int rs = 53,  en = 52, d4 = 51, d5 = 50, d6 = 49, d7 = 48;
+LiquidCrystal lcd(rs, en, d4, d5, d6, d7);
 
 
 //extern "C"{
