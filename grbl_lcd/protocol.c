@@ -187,39 +187,40 @@ void protocol_main_loop()
            } 
         }
         */
-        //PrintComandLCD("      ");
-        rt_exec_m = sys_rt_exec_position; // Copy volatile sys_rt_exec_alarm.
-        if (rt_exec_m) {
-            if (sys.state != STATE_HOLD){
-                if (rt_exec_m & EXEC_GO_HOME){
-                    //PrintComandLCD("HOME");
-                    //report_status_message(gc_execute_line( "G90G0X0Y0Z0"));
-                    
-                    report_status_message(gc_execute_line("G90G0Z5"));
-					report_status_message(gc_execute_line("G0X0Y0"));
-					report_status_message(gc_execute_line("G90G1Z0F25"));
-											
-                    system_clear_exec_position_flag(EXEC_GO_HOME);
-                }
-                if (rt_exec_m & EXEC_SET_ZERO){
-					//PrintComandLCD("SFEED");
-					if(sys.sfeed_rate == 250) sys.sfeed_rate = 50; else sys.sfeed_rate += 50;
-					system_clear_exec_position_flag(EXEC_SET_ZERO);
-                }
-                if (rt_exec_m & EXEC_SET_SPINDLE){
-					if(spindle_get_state()){ 
-						//PrintComandLCD("SPON  ");
-						report_status_message(gc_execute_line( "M5S0"));
-					}else {
-						//PrintComandLCD("SPOFF ");
-						report_status_message(gc_execute_line( "M3S30000"));
-					}
-                    system_clear_exec_position_flag(EXEC_SET_SPINDLE);
-                }
-            } 
-        }
-        
         if(!sys.cmd_count){
+        //PrintComandLCD("      ");
+			rt_exec_m = sys_rt_exec_position; // Copy volatile sys_rt_exec_alarm.
+			if (rt_exec_m) {
+				if (sys.state != STATE_HOLD){
+					if (rt_exec_m & EXEC_GO_HOME){
+						//PrintComandLCD("HOME");
+						//report_status_message(gc_execute_line( "G90G0X0Y0Z0"));
+						
+						report_status_message(gc_execute_line("G90G0Z5"));
+						report_status_message(gc_execute_line("G0X0Y0"));
+						report_status_message(gc_execute_line("G90G1Z0F25"));
+												
+						system_clear_exec_position_flag(EXEC_GO_HOME);
+					}
+					if (rt_exec_m & EXEC_SET_ZERO){
+						//PrintComandLCD("SFEED");
+						if(sys.sfeed_rate == 250) sys.sfeed_rate = 50; else sys.sfeed_rate += 50;
+						system_clear_exec_position_flag(EXEC_SET_ZERO);
+					}
+					if (rt_exec_m & EXEC_SET_SPINDLE){
+						if(spindle_get_state()){ 
+							//PrintComandLCD("SPON  ");
+							report_status_message(gc_execute_line( "M5S0"));
+						}else {
+							//PrintComandLCD("SPOFF ");
+							report_status_message(gc_execute_line( "M3S30000"));
+						}
+						system_clear_exec_position_flag(EXEC_SET_SPINDLE);
+					}
+				} 
+			}
+        
+            //if(!sys.cmd_count){
 			//protocol_read_axispins();
 			pin_x = 0.0;
 			pin_y = 0.0;
@@ -335,6 +336,7 @@ void protocol_main_loop()
 				
 				//PrintComandLCD(&axis_move_buttons[6]);
 				report_status_message(gc_execute_line(axis_move_buttons));
+				sys.cmd_count += CMD_COUNT_MIN;
 			}else{
 				pin_pressed = protocol_read_axissetxy();
 				if(pin_pressed){

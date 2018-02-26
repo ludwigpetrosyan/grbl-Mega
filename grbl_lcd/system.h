@@ -150,6 +150,7 @@
 #define SPINDLE_STOP_OVR_RESTORE_CYCLE  bit(3)
 
 #define CMD_COUNT_MAX 25
+#define CMD_COUNT_MIN 15
 // Define global system variables
 typedef struct {
   uint8_t state;               // Tracks the current system state of Grbl.
