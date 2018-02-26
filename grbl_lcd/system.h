@@ -178,6 +178,13 @@ typedef struct {
   int   sfeed_rate;
   int   cmd_count;
   int   cmd_count_enable;
+  
+  int encoderXPos;
+  int encoderXPinALast;
+  int nX;
+  int encoderYPos;
+  int encoderYPinALast;
+  int nY;
 } system_t;
 extern system_t sys;
 

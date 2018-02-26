@@ -61,7 +61,18 @@ int main(void)
   pinMode(zHometPin, INPUT_PULLUP);
   pinMode(xyHomePin, INPUT_PULLUP);
   
+  pinMode(encoderXaPin, INPUT);
+  pinMode(encoderXbPin, INPUT);
+  pinMode(encoderYaPin, INPUT);
+  pinMode(encoderYbPin, INPUT);
   
+  
+  digitalWrite(encoderXaPin, LOW);
+  digitalWrite(encoderXbPin, LOW);
+  digitalWrite(encoderYaPin, LOW);
+  digitalWrite(encoderYbPin, LOW);
+  
+ 
   //end added
   serial_init();   // Setup serial baud rate and interrupts
   settings_init(); // Load Grbl settings from EEPROM
@@ -125,9 +136,16 @@ int main(void)
 	sys_rt_exec_position = 0;   // added
 	
 	sys.sfeed_rate = 250;
-        sys.cmd_count  = 0;
-        sys.cmd_count_enable = 0;
-        //sys.step_per_click = 0.01;
+    sys.cmd_count  = 0;
+    sys.cmd_count_enable = 0;
+    //sys.step_per_click = 0.01;
+        
+    sys.encoderXPos = 0;
+    sys.encoderXPinALast = LOW;
+    sys.nX = LOW;
+    sys.encoderYPos = 0;
+    sys.encoderYPinALast = LOW;
+    sys.nY = LOW;
 
 
 	

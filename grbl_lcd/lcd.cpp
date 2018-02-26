@@ -92,7 +92,7 @@ void PrintComandCountLCD(int cnt)
     char str[7];
 	 
     sprintf(str,"%-6d", cnt);
-    lcd.setCursor(0, 3);
+    lcd.setCursor(9, 3);
     lcd.print(str);
 }
 

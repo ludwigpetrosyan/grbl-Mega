@@ -56,6 +56,10 @@ int protocol_read_setpwm();
 int protocol_read_setstep();
 //added read digital pins for pwm settings
 int protocol_read_xyzhome();
+//added read digital pins for pwm settings
+int protocol_read_xencoder();
+//added read digital pins for pwm settings
+int protocol_read_yencoder();
 
 extern volatile uint8_t step_per_click;
 

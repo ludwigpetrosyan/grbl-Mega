@@ -187,6 +187,10 @@ void protocol_main_loop()
            } 
         }
         */
+        
+        
+        protocol_read_xencoder();
+        protocol_read_yencoder();
         if(!sys.cmd_count){
         //PrintComandLCD("      ");
 			rt_exec_m = sys_rt_exec_position; // Copy volatile sys_rt_exec_alarm.
@@ -922,6 +926,36 @@ int protocol_read_xyzhome()
 	}
 	
 	return pinValue;
+}
+
+int protocol_read_xencoder()
+{
+  sys.nX = digitalRead(encoderXaPin);
+  if ((sys.encoderXPinALast == LOW) && (sys.nX == HIGH)) {
+	PrintComandLCD("X-ENCDER");
+    if (digitalRead(encoderXbPin) == LOW) {
+      sys.encoderXPos--;
+    } else {
+      sys.encoderXPos++;
+    }
+    PrintComandCountLCD(sys.encoderXPos);
+  }
+  sys.encoderXPinALast = sys.nX;
+}
+
+int protocol_read_yencoder()
+{
+  sys.nY = digitalRead(encoderYaPin);
+  if ((sys.encoderYPinALast == LOW) && (sys.nY == HIGH)) {
+	PrintComandLCD("Y-ENCDER");
+    if (digitalRead(encoderYbPin) == LOW) {
+      sys.encoderYPos--;
+    } else {
+      sys.encoderYPos++;
+    }
+    PrintComandCountLCD(sys.encoderYPos);
+  }
+  sys.encoderYPinALast = sys.nY;
 }
 
 //end added

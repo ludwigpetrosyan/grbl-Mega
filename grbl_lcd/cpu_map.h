@@ -147,6 +147,12 @@
   #define pwmSetPin  36 //36   //
   #define zHometPin  35 //36   //
   #define xyHomePin  37 //36   //
+  
+  #define encoderXaPin 54
+  #define encoderXbPin 55
+  #define encoderYaPin 56
+  #define encoderYbPin 57
+  
 
     /* 
      * pins used for LCD
