@@ -360,9 +360,13 @@ void protocol_main_loop()
 							PrintStepLCD(step_per_click);
 							//PrintFStepLCD(step_per_click);
 						}else{
-							pin_pressed = protocol_read_setpwm();
+							pin_pressed = protocol_read_sethome();
 							if(pin_pressed){
-								PrintComandLCD("PWM");
+								PrintComandLCD("HOME");
+								report_status_message(gc_execute_line("G90G0Z5"));
+						        report_status_message(gc_execute_line("G0X0Y0"));
+						        report_status_message(gc_execute_line("G90G1Z0F25"));
+								
 							}else{
 								pin_pressed = protocol_read_xyzhome();
 								if(pin_pressed){
@@ -382,6 +386,17 @@ void protocol_main_loop()
 											report_status_message(gc_execute_line("G90G1Z0F25"));
 											//PrintComandLCD("XYZHOM");
 											break;
+									}
+								}else{
+									pin_pressed = protocol_read_setfeed();
+									if(pin_pressed){
+										//PrintComandLCD("FEED");
+										if(sys.sfeed_rate == 250) sys.sfeed_rate = 50; else sys.sfeed_rate += 50;
+									}else{
+										pin_pressed = protocol_read_goxy();
+										if(pin_pressed){
+											PrintComandLCD("GOXY");
+										}
 									}
 								}
 							}
@@ -887,16 +902,40 @@ int protocol_read_axissetz()
 	return pinValue;
 }
 
-int protocol_read_setpwm()
+int protocol_read_sethome()
 {
 	int pinValue = 0;
 	int val = 0;
 	
-	val = digitalRead(pwmSetPin);
+	val = digitalRead(homeSetPin);
 	if(!val) 	pinValue = 1;
 	
 	return pinValue;
 }
+
+int protocol_read_setfeed()
+{
+	int pinValue = 0;
+	int val = 0;
+	
+	val = digitalRead(feedSetPin);
+	if(!val) 	pinValue = 1;
+	
+	return pinValue;
+}
+
+int protocol_read_goxy()
+{
+	int pinValue = 0;
+	int val = 0;
+	
+	val = digitalRead(goXyPin);
+	if(!val) 	pinValue = 1;
+	
+	return pinValue;
+}
+
+
 
 int protocol_read_setstep()
 {
@@ -932,13 +971,14 @@ int protocol_read_xencoder()
 {
   sys.nX = digitalRead(encoderXaPin);
   if ((sys.encoderXPinALast == LOW) && (sys.nX == HIGH)) {
-	PrintComandLCD("X-ENCDER");
+	//PrintComandLCD("X-ENCDER");
     if (digitalRead(encoderXbPin) == LOW) {
       sys.encoderXPos--;
     } else {
       sys.encoderXPos++;
     }
-    PrintComandCountLCD(sys.encoderXPos);
+    
+    PrintPosLCDXX(sys.encoderXPos);
   }
   sys.encoderXPinALast = sys.nX;
 }
@@ -947,13 +987,14 @@ int protocol_read_yencoder()
 {
   sys.nY = digitalRead(encoderYaPin);
   if ((sys.encoderYPinALast == LOW) && (sys.nY == HIGH)) {
-	PrintComandLCD("Y-ENCDER");
+	//PrintComandLCD("Y-ENCDER");
     if (digitalRead(encoderYbPin) == LOW) {
       sys.encoderYPos--;
     } else {
       sys.encoderYPos++;
     }
-    PrintComandCountLCD(sys.encoderYPos);
+    //PrintComandCountLCD(sys.encoderYPos);
+    PrintPosLCDYY(sys.encoderYPos);
   }
   sys.encoderYPinALast = sys.nY;
 }

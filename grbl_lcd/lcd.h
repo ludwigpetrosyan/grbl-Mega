@@ -65,6 +65,8 @@ void PrintXyzPinsLCD(int of, float f);
 void PrintSfeedLCD(int f);
 void PrintStepLCD(int idx);
 void PrintFStepLCD(int idx);
+void PrintPosLCDXX(float x);
+void PrintPosLCDYY(float y);
 
 #ifdef __cplusplus
 }

@@ -18,7 +18,7 @@
 //const int rs = 52, rw = 50, en = 48, d4 = 46, d5 = 44, d6 = 42, d7 = 40;
 //LiquidCrystal lcd(rs, rw, en, d4, d5, d6, d7);
 
-const int rs = 53,  en = 52, d4 = 51, d5 = 50, d6 = 49, d7 = 48;
+const int rs = 52,  en = 53, d4 = 50, d5 = 51, d6 = 48, d7 = 49;
 LiquidCrystal lcd(rs, en, d4, d5, d6, d7);
 
 
@@ -214,6 +214,22 @@ void PrintStepLCD(int idx)
 {
 	lcd.setCursor(7, 1);
 	lcd.print(y);
+}
+
+void PrintPosLCDXX(float x)
+{
+	lcd.setCursor(0, 3);
+	lcd.print(x);
+	lcd.setCursor(4, 3);
+	lcd.print("   ");
+}
+
+ void PrintPosLCDYY(float y)
+{
+	lcd.setCursor(7, 3);
+	lcd.print(y);
+	lcd.setCursor(11, 3);
+	lcd.print("   ");
 }
 
  void PrintPosLCDZ(float z)

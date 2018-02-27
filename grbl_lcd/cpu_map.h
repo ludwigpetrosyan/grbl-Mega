@@ -135,25 +135,28 @@
   #define SPINDLE_PWM_BIT		4 // MEGA2560 Digital Pin 7
   
   
-  #define xUpPin          53 //45   // 
-  #define xDownPin     51 //44   // 
-  #define yUpPin          49 //43   // 
-  #define yDownPin     47 //42   // 
-  #define zUpPin          45 //41   // 
-  #define zDownPin     43 //40   // 
-  #define xySetPin       41 //39   // 
-  #define zSetPin         39 //38   // 
-  #define zHometPin   38 //36   //
-  #define xyHomePin  37 //36   //
+  #define xUpPin       47 //45   // 
+  #define xDownPin     46 //44   // 
+  #define yUpPin       45 //43   // 
+  #define yDownPin     44 //42   // 
+  #define zUpPin       43 //41   // 
+  #define zDownPin     42 //40   // 
+  #define xySetPin     41 //39   // 
+  #define zSetPin      40 //38   // 
+  #define zHometPin    39 //36   //
+  #define xyHomePin    38 //36   //
   
-  #define StepSetPin 38 //37   //
-  #define pwmSetPin  36 //36   //
+  #define StepSetPin   37 //37   //
+  #define homeSetPin   36 //36   // home
+  
+  #define goXyPin      35 //36   // home
+  #define feedSetPin   34 //36   // home
  
   
-  #define encoderXaPin 54
-  #define encoderXbPin 55
-  #define encoderYaPin 56
-  #define encoderYbPin 57
+  #define encoderXaPin A0
+  #define encoderXbPin A1
+  #define encoderYaPin A2
+  #define encoderYbPin A3
   
 
     /* 

@@ -51,9 +51,13 @@ int protocol_read_axissetxy();
 //added read digital pins for axis moving
 int protocol_read_axissetz();
 //added read digital pins for pwm settings
-int protocol_read_setpwm();
+int protocol_read_sethome();
 //added read digital pins for pwm settings
 int protocol_read_setstep();
+//added read digital pins for pwm settings
+int protocol_read_setfeed();
+//added read digital pins for pwm settings
+int protocol_read_goxy();
 //added read digital pins for pwm settings
 int protocol_read_xyzhome();
 //added read digital pins for pwm settings

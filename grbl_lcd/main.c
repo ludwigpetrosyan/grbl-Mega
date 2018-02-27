@@ -48,29 +48,38 @@ int main(void)
   // Initialize system upon power-up.
   
   //added
-  pinMode(xUpPin, INPUT_PULLUP);
+  pinMode(xUpPin,   INPUT_PULLUP);
   pinMode(xDownPin, INPUT_PULLUP);
-  pinMode(yUpPin, INPUT_PULLUP);
+  pinMode(yUpPin,   INPUT_PULLUP);
   pinMode(yDownPin, INPUT_PULLUP);
-  pinMode(zUpPin, INPUT_PULLUP);
+  pinMode(zUpPin,   INPUT_PULLUP);
   pinMode(zDownPin, INPUT_PULLUP);
   pinMode(xySetPin, INPUT_PULLUP);
-  pinMode(zSetPin, INPUT_PULLUP);
-  pinMode(pwmSetPin, INPUT_PULLUP);
+  pinMode(zSetPin,  INPUT_PULLUP);
   pinMode(StepSetPin, INPUT_PULLUP);
-  pinMode(zHometPin, INPUT_PULLUP);
-  pinMode(xyHomePin, INPUT_PULLUP);
+  pinMode(zHometPin,  INPUT_PULLUP);
+  pinMode(xyHomePin,  INPUT_PULLUP);
   
-  pinMode(encoderXaPin, INPUT);
-  pinMode(encoderXbPin, INPUT);
-  pinMode(encoderYaPin, INPUT);
-  pinMode(encoderYbPin, INPUT);
+  pinMode(homeSetPin, INPUT_PULLUP);
+  pinMode(goXyPin,    INPUT_PULLUP);
+  pinMode(feedSetPin, INPUT_PULLUP);
   
+ 
   
-  digitalWrite(encoderXaPin, LOW);
-  digitalWrite(encoderXbPin, LOW);
-  digitalWrite(encoderYaPin, LOW);
-  digitalWrite(encoderYbPin, LOW);
+  //pinMode(encoderXaPin, INPUT);
+  //pinMode(encoderXbPin, INPUT);
+  //pinMode(encoderYaPin, INPUT);
+  //pinMode(encoderYbPin, INPUT);
+  
+  pinMode(encoderXaPin, INPUT_PULLUP);
+  pinMode(encoderXbPin, INPUT_PULLUP);
+  pinMode(encoderYaPin, INPUT_PULLUP);
+  pinMode(encoderYbPin, INPUT_PULLUP);
+  
+  //digitalWrite(encoderXaPin, LOW);
+  //digitalWrite(encoderXbPin, LOW);
+  //digitalWrite(encoderYaPin, LOW);
+  //digitalWrite(encoderYbPin, LOW);
   
  
   //end added
