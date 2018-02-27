@@ -38,6 +38,11 @@ volatile uint8_t main_count;
 volatile uint8_t protocol_count;
 volatile uint8_t step_per_click;
 
+volatile uint8_t nX;
+volatile uint8_t nY;
+volatile uint8_t bX;
+volatile uint8_t bY;
+
 #ifdef DEBUG
   volatile uint8_t sys_rt_exec_debug;
 #endif
@@ -59,29 +64,22 @@ int main(void)
   pinMode(StepSetPin, INPUT_PULLUP);
   pinMode(zHometPin,  INPUT_PULLUP);
   pinMode(xyHomePin,  INPUT_PULLUP);
-  
-  pinMode(homeSetPin, INPUT_PULLUP);
   pinMode(goXyPin,    INPUT_PULLUP);
-  pinMode(feedSetPin, INPUT_PULLUP);
   
- 
-  
-  //pinMode(encoderXaPin, INPUT);
-  //pinMode(encoderXbPin, INPUT);
-  //pinMode(encoderYaPin, INPUT);
-  //pinMode(encoderYbPin, INPUT);
+  pinMode(lcd_rs,  OUTPUT);
+  pinMode(lcd_en,  OUTPUT);
+  pinMode(lcd_d4,  OUTPUT);
+  pinMode(lcd_d5,  OUTPUT);
+  pinMode(lcd_d6,  OUTPUT);
+  pinMode(lcd_d7,  OUTPUT);
   
   pinMode(encoderXaPin, INPUT_PULLUP);
   pinMode(encoderXbPin, INPUT_PULLUP);
   pinMode(encoderYaPin, INPUT_PULLUP);
   pinMode(encoderYbPin, INPUT_PULLUP);
+  pinMode(encoderSetX0, INPUT_PULLUP);
+  pinMode(encoderSetY0, INPUT_PULLUP);
   
-  //digitalWrite(encoderXaPin, LOW);
-  //digitalWrite(encoderXbPin, LOW);
-  //digitalWrite(encoderYaPin, LOW);
-  //digitalWrite(encoderYbPin, LOW);
-  
- 
   //end added
   serial_init();   // Setup serial baud rate and interrupts
   settings_init(); // Load Grbl settings from EEPROM
@@ -149,13 +147,16 @@ int main(void)
     sys.cmd_count_enable = 0;
     //sys.step_per_click = 0.01;
         
-    sys.encoderXPos = 0;
     sys.encoderXPinALast = LOW;
     sys.nX = LOW;
-    sys.encoderYPos = 0;
     sys.encoderYPinALast = LOW;
     sys.nY = LOW;
 
+	sys.bX = 0;
+	sys.bY = 0;
+	sys.step_click = 0.001;
+	sys.encoderXFPos = 0.0;
+	sys.encoderYFPos = 0.0;
 
 	
 

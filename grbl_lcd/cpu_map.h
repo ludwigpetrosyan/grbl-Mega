@@ -94,14 +94,14 @@
   #define CONTROL_FEED_HOLD_BIT       1  // MEGA2560 Analog Pin 9
   #define CONTROL_CYCLE_START_BIT     2  // MEGA2560 Analog Pin 10
   #define CONTROL_SAFETY_DOOR_BIT     3  // MEGA2560 Analog Pin 11
-  #define CONTROL_GO_HOME_BIT         4  // MEGA2560 Analog Pin 12
-  #define CONTROL_SET_ZERO_BIT        5  // MEGA2560 Analog Pin 13
+  #define CONTROL_HOME_BIT         4  // MEGA2560 Analog Pin 12
+  #define CONTROL_FEED_BIT         5  // MEGA2560 Analog Pin 13
   #define CONTROL_SET_SPINDLE_BIT     6  // MEGA2560 Analog Pin 14
   #define CONTROL_INT       PCIE2  // Pin change interrupt enable pin
   #define CONTROL_INT_vect  PCINT2_vect
   #define CONTROL_PCMSK     PCMSK2 // Pin change interrupt register
  // #define CONTROL_MASK      ((1<<CONTROL_RESET_BIT)|(1<<CONTROL_FEED_HOLD_BIT)|(1<<CONTROL_CYCLE_START_BIT)|(1<<CONTROL_SAFETY_DOOR_BIT))
-   #define CONTROL_MASK      ((1<<CONTROL_RESET_BIT)|(1<<CONTROL_FEED_HOLD_BIT)|(1<<CONTROL_CYCLE_START_BIT)|(1<<CONTROL_SAFETY_DOOR_BIT)|(1<<CONTROL_GO_HOME_BIT)|(1<<CONTROL_SET_ZERO_BIT)|(1<<CONTROL_SET_SPINDLE_BIT)) //added 
+   #define CONTROL_MASK      ((1<<CONTROL_RESET_BIT)|(1<<CONTROL_FEED_HOLD_BIT)|(1<<CONTROL_CYCLE_START_BIT)|(1<<CONTROL_SAFETY_DOOR_BIT)|(1<<CONTROL_HOME_BIT)|(1<<CONTROL_FEED_BIT)|(1<<CONTROL_SET_SPINDLE_BIT)) //added 
 
   // Define probe switch input pin.
   #define PROBE_DDR       DDRK
@@ -135,28 +135,42 @@
   #define SPINDLE_PWM_BIT		4 // MEGA2560 Digital Pin 7
   
   
-  #define xUpPin       47 //45   // 
-  #define xDownPin     46 //44   // 
-  #define yUpPin       45 //43   // 
-  #define yDownPin     44 //42   // 
-  #define zUpPin       43 //41   // 
-  #define zDownPin     42 //40   // 
-  #define xySetPin     41 //39   // 
-  #define zSetPin      40 //38   // 
+  #define xUpPin           47 //45   // 
+  #define xDownPin      46 //44   // 
+  #define yUpPin           45 //43   // 
+  #define yDownPin      44 //42   // 
+  #define zUpPin           43 //41   // 
+  #define zDownPin      42 //40   // 
+  #define xySetPin        41 //39   // 
+  #define zSetPin          40 //38   // 
   #define zHometPin    39 //36   //
   #define xyHomePin    38 //36   //
   
-  #define StepSetPin   37 //37   //
-  #define homeSetPin   36 //36   // home
-  
-  #define goXyPin      35 //36   // home
-  #define feedSetPin   34 //36   // home
+  #define StepSetPin     37 //37   //
+  #define goXyPin         36 //36   // home
  
-  
+  /*
+  #define encoderX_Pin A12
+  #define encoderY_Pin A13
   #define encoderXaPin A0
   #define encoderXbPin A1
   #define encoderYaPin A2
   #define encoderYbPin A3
+  */
+  
+  #define encoderXaPin 53
+  #define encoderXbPin 52
+  #define encoderYaPin  51
+  #define encoderYbPin 50
+  #define encoderSetX0 49
+  #define encoderSetY0 48
+  
+  #define lcd_rs A0
+  #define lcd_en A1
+  #define lcd_d4 A2
+  #define lcd_d5 A3
+  #define lcd_d6 A4
+  #define lcd_d7 A5
   
 
     /* 

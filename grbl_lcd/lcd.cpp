@@ -18,7 +18,9 @@
 //const int rs = 52, rw = 50, en = 48, d4 = 46, d5 = 44, d6 = 42, d7 = 40;
 //LiquidCrystal lcd(rs, rw, en, d4, d5, d6, d7);
 
-const int rs = 52,  en = 53, d4 = 50, d5 = 51, d6 = 48, d7 = 49;
+//const int rs = 52,  en = 53, d4 = 50, d5 = 51, d6 = 48, d7 = 49;
+//const int rs = A0,  en = A1, d4 = A2, d5 = A3, d6 = A4, d7 = A5;
+const int rs = 54,  en = 55, d4 = 56, d5 = 57, d6 = 58, d7 = 59;
 LiquidCrystal lcd(rs, en, d4, d5, d6, d7);
 
 
@@ -136,6 +138,8 @@ void PrintStepLCD(int idx)
             lcd.print("1.00");
             break;
     }
+     lcd.setCursor(8, 3);
+      lcd.print("      ");
 }
 
  void PrintLCD(double pos)
@@ -219,17 +223,17 @@ void PrintStepLCD(int idx)
 void PrintPosLCDXX(float x)
 {
 	lcd.setCursor(0, 3);
+	lcd.print("       ");
+	lcd.setCursor(0, 3);
 	lcd.print(x);
-	lcd.setCursor(4, 3);
-	lcd.print("   ");
 }
 
  void PrintPosLCDYY(float y)
 {
 	lcd.setCursor(7, 3);
+	lcd.print("       ");
+	lcd.setCursor(7, 3);
 	lcd.print(y);
-	lcd.setCursor(11, 3);
-	lcd.print("   ");
 }
 
  void PrintPosLCDZ(float z)

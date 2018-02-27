@@ -49,8 +49,8 @@ uint8_t system_control_get_state()
     if (bit_isfalse(pin,(1<<CONTROL_RESET_BIT))) { control_state |= CONTROL_PIN_INDEX_RESET; }
     if (bit_isfalse(pin,(1<<CONTROL_FEED_HOLD_BIT))) { control_state |= CONTROL_PIN_INDEX_FEED_HOLD; }
     if (bit_isfalse(pin,(1<<CONTROL_CYCLE_START_BIT))) { control_state |= CONTROL_PIN_INDEX_CYCLE_START; }
-    if (bit_isfalse(pin,(1<<CONTROL_GO_HOME_BIT))) { control_state |= CONTROL_PIN_INDEX_GO_HOME; } //added
-    if (bit_isfalse(pin,(1<<CONTROL_SET_ZERO_BIT))) { control_state |= CONTROL_PIN_INDEX_SET_ZERO; } //added
+    if (bit_isfalse(pin,(1<<CONTROL_HOME_BIT))) { control_state |= CONTROL_PIN_INDEX_HOME; }     //added
+    if (bit_isfalse(pin,(1<<CONTROL_FEED_BIT))) { control_state |= CONTROL_PIN_INDEX_FEED; }      //added
     if (bit_isfalse(pin,(1<<CONTROL_SET_SPINDLE_BIT))) { control_state |= CONTROL_PIN_INDEX_SET_SPINDLE; } //added
   }
   return(control_state);
@@ -74,12 +74,12 @@ ISR(CONTROL_INT_vect)
       bit_true(sys_rt_exec_state, EXEC_FEED_HOLD); 
     } else if (bit_istrue(pin,CONTROL_PIN_INDEX_SAFETY_DOOR)) {
       bit_true(sys_rt_exec_state, EXEC_SAFETY_DOOR);
-    } else if (bit_istrue(pin,CONTROL_PIN_INDEX_GO_HOME)) {
-      bit_true(sys_rt_exec_position, EXEC_GO_HOME);
-    } else if (bit_istrue(pin,CONTROL_PIN_INDEX_SET_ZERO)) {
-      bit_true(sys_rt_exec_position, EXEC_SET_ZERO);
+    } else if (bit_istrue(pin,CONTROL_PIN_INDEX_HOME)) {
+	   bit_true(sys_rt_exec_position, EXEC_SET_HOME);
+    } else if (bit_istrue(pin,CONTROL_PIN_INDEX_FEED)) {
+		bit_true(sys_rt_exec_position, EXEC_SET_FEED);
     } else if (bit_istrue(pin,CONTROL_PIN_INDEX_SET_SPINDLE)) {
-      bit_true(sys_rt_exec_position, EXEC_SET_SPINDLE);
+        bit_true(sys_rt_exec_position, EXEC_SET_SPINDLE);
     }
   }
 }

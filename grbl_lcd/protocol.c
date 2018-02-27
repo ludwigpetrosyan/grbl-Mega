@@ -80,6 +80,15 @@ void protocol_main_loop()
     float pin_z = 0.0;
     int   pin_pressed = 0;
     char* axis_move_buttons = "G91G1X+0.01Y+0.01Z+0.01F250"; 
+    char* axis_goto_buttons = "G90G1X+0.01Y+0.01F250"; 
+    char   axis_goto_str [30]; 
+    char* axis_goto_buttons0 = "G90G1X"; 
+    char* axis_goto_buttons1 = "Y"; 
+    char* axis_goto_buttons2 = "F"; 
+    
+    char floatX[8];
+    char floatY[8];
+    char intFeed[4];
 
     //end added
   for (;;) {
@@ -173,22 +182,12 @@ void protocol_main_loop()
     if(c == SERIAL_NO_DATA){
         if(sys.cmd_count_enable){
             sys.cmd_count++;
-            if(sys.cmd_count == CMD_COUNT_MAX){
+            if(sys.cmd_count >= CMD_COUNT_MAX){
                 sys.cmd_count = 0;
                 sys.cmd_count_enable = 0;
             }
         }
-          
-        /* seems I do not use it more, let comment for time
-        rt_exec_m = sys_rt_exec_axis; // Copy volatile sys_rt_exec_alarm.
-        if (rt_exec_m) {
-           if (sys.state != STATE_HOLD){
-                                PrintComandLCD("AXIS");
-           } 
-        }
-        */
-        
-        
+       
         protocol_read_xencoder();
         protocol_read_yencoder();
         if(!sys.cmd_count){
@@ -196,20 +195,19 @@ void protocol_main_loop()
 			rt_exec_m = sys_rt_exec_position; // Copy volatile sys_rt_exec_alarm.
 			if (rt_exec_m) {
 				if (sys.state != STATE_HOLD){
-					if (rt_exec_m & EXEC_GO_HOME){
+					if (rt_exec_m & EXEC_SET_HOME){
 						//PrintComandLCD("HOME");
-						//report_status_message(gc_execute_line( "G90G0X0Y0Z0"));
-						
 						report_status_message(gc_execute_line("G90G0Z5"));
 						report_status_message(gc_execute_line("G0X0Y0"));
 						report_status_message(gc_execute_line("G90G1Z0F25"));
 												
-						system_clear_exec_position_flag(EXEC_GO_HOME);
+						system_clear_exec_position_flag(EXEC_SET_HOME);
 					}
-					if (rt_exec_m & EXEC_SET_ZERO){
+					if (rt_exec_m & EXEC_SET_FEED){
 						//PrintComandLCD("SFEED");
 						if(sys.sfeed_rate == 250) sys.sfeed_rate = 50; else sys.sfeed_rate += 50;
-						system_clear_exec_position_flag(EXEC_SET_ZERO);
+						
+						system_clear_exec_position_flag(EXEC_SET_FEED);
 					}
 					if (rt_exec_m & EXEC_SET_SPINDLE){
 						if(spindle_get_state()){ 
@@ -358,48 +356,79 @@ void protocol_main_loop()
 								step_per_click += 1;
 							}
 							PrintStepLCD(step_per_click);
+							switch(step_per_click){
+								case 0:
+								    sys.step_click = 0.01;
+									break;
+								case 1:
+									sys.step_click = 0.1;
+									break;
+								case 2:
+									sys.step_click = 1.0;
+									break;
+							}
 							//PrintFStepLCD(step_per_click);
 						}else{
-							pin_pressed = protocol_read_sethome();
+							pin_pressed = protocol_read_xyzhome();
 							if(pin_pressed){
-								PrintComandLCD("HOME");
-								report_status_message(gc_execute_line("G90G0Z5"));
-						        report_status_message(gc_execute_line("G0X0Y0"));
-						        report_status_message(gc_execute_line("G90G1Z0F25"));
-								
+								switch (pin_pressed){
+									case 1:
+										report_status_message(gc_execute_line("G90G1Z0F25"));
+										//PrintComandLCD("ZHOME");
+										break;
+									case 2:
+										report_status_message(gc_execute_line("G90G0Z5"));
+										report_status_message(gc_execute_line("G90G0X0Y0"));
+										//PrintComandLCD("XYHOME");
+										break;
+									case 3:
+										report_status_message(gc_execute_line("G90G0Z5"));
+										report_status_message(gc_execute_line("G0X0Y0"));
+										report_status_message(gc_execute_line("G90G1Z0F25"));
+										//PrintComandLCD("XYZHOM");
+										break;
+								}
 							}else{
-								pin_pressed = protocol_read_xyzhome();
+								pin_pressed = protocol_read_goxy();
 								if(pin_pressed){
-									switch (pin_pressed){
-										case 1:
-											report_status_message(gc_execute_line("G90G1Z0F25"));
-											//PrintComandLCD("ZHOME");
-											break;
-										case 2:
-											report_status_message(gc_execute_line("G90G0Z5"));
-											report_status_message(gc_execute_line("G90G0X0Y0"));
-											//PrintComandLCD("XYHOME");
-											break;
-										case 3:
-											report_status_message(gc_execute_line("G90G0Z5"));
-											report_status_message(gc_execute_line("G0X0Y0"));
-											report_status_message(gc_execute_line("G90G1Z0F25"));
-											//PrintComandLCD("XYZHOM");
-											break;
-									}
+									//PrintComandLCD("GOXY");
+									axis_goto_str[0] = '\0';
+									//floatX;
+									//floatY;
+									//intFeed;
+									//char* axis_goto_buttons0 = "G90G1X"; 
+									//char* axis_goto_buttons1 = "Y"; 
+									//char* axis_goto_buttons2 = "F"; 
+									//axis_goto_str
+									
+									//sprintf(floatX, "%i", sys.encoderXFPos);
+									dtostrf(sys.encoderXFPos, 3, 2, floatX);
+									dtostrf(sys.encoderYFPos, 3, 2, floatY);
+									strcat(axis_goto_str, axis_goto_buttons0);
+									strcat(axis_goto_str, floatX);
+									strcat(axis_goto_str, axis_goto_buttons1);
+									strcat(axis_goto_str, floatY);
+									strcat(axis_goto_str, axis_goto_buttons2);
+									sprintf(intFeed, "%-.4d", sys.sfeed_rate);
+									strcat(axis_goto_str, intFeed);
+									//PrintComandLCD(floatX);
+									//PrintComandLCD(axis_goto_str);
+									report_status_message(gc_execute_line(axis_goto_str));
+									//"G90G1X+0.01Y+0.01F250"; 
 								}else{
-									pin_pressed = protocol_read_setfeed();
+									pin_pressed = protocol_read_xencoder0();
 									if(pin_pressed){
-										//PrintComandLCD("FEED");
-										if(sys.sfeed_rate == 250) sys.sfeed_rate = 50; else sys.sfeed_rate += 50;
+										sys.encoderXFPos = 0.0;
+										PrintPosLCDXX(sys.encoderXFPos);
 									}else{
-										pin_pressed = protocol_read_goxy();
+										pin_pressed = protocol_read_yencoder0();
 										if(pin_pressed){
-											PrintComandLCD("GOXY");
+											sys.encoderYFPos = 0.0;
+											PrintPosLCDYY(sys.encoderYFPos);
 										}
 									}
 								}
-							}
+							}							
 						}
 					}
 				}
@@ -902,28 +931,6 @@ int protocol_read_axissetz()
 	return pinValue;
 }
 
-int protocol_read_sethome()
-{
-	int pinValue = 0;
-	int val = 0;
-	
-	val = digitalRead(homeSetPin);
-	if(!val) 	pinValue = 1;
-	
-	return pinValue;
-}
-
-int protocol_read_setfeed()
-{
-	int pinValue = 0;
-	int val = 0;
-	
-	val = digitalRead(feedSetPin);
-	if(!val) 	pinValue = 1;
-	
-	return pinValue;
-}
-
 int protocol_read_goxy()
 {
 	int pinValue = 0;
@@ -943,6 +950,28 @@ int protocol_read_setstep()
 	int val = 0;
 	
 	val = digitalRead(StepSetPin);
+	if(!val) 	pinValue = 1;
+	
+	return pinValue;
+}
+
+protocol_read_xencoder0()
+{
+	int pinValue = 0;
+	int val = 0;
+	
+	val = digitalRead(encoderSetX0);
+	if(!val) 	pinValue = 1;
+	
+	return pinValue;
+}
+
+protocol_read_yencoder0()
+{
+	int pinValue = 0;
+	int val = 0;
+	
+	val = digitalRead(encoderSetY0);
 	if(!val) 	pinValue = 1;
 	
 	return pinValue;
@@ -973,12 +1002,12 @@ int protocol_read_xencoder()
   if ((sys.encoderXPinALast == LOW) && (sys.nX == HIGH)) {
 	//PrintComandLCD("X-ENCDER");
     if (digitalRead(encoderXbPin) == LOW) {
-      sys.encoderXPos--;
+      sys.encoderXFPos = sys.encoderXFPos - sys.step_click;
     } else {
-      sys.encoderXPos++;
+      sys.encoderXFPos = sys.encoderXFPos + sys.step_click;
     }
     
-    PrintPosLCDXX(sys.encoderXPos);
+    PrintPosLCDXX(sys.encoderXFPos);
   }
   sys.encoderXPinALast = sys.nX;
 }
@@ -989,12 +1018,11 @@ int protocol_read_yencoder()
   if ((sys.encoderYPinALast == LOW) && (sys.nY == HIGH)) {
 	//PrintComandLCD("Y-ENCDER");
     if (digitalRead(encoderYbPin) == LOW) {
-      sys.encoderYPos--;
+      sys.encoderYFPos = sys.encoderYFPos - sys.step_click;
     } else {
-      sys.encoderYPos++;
+      sys.encoderYFPos = sys.encoderYFPos + sys.step_click;
     }
-    //PrintComandCountLCD(sys.encoderYPos);
-    PrintPosLCDYY(sys.encoderYPos);
+    PrintPosLCDYY(sys.encoderYFPos);
   }
   sys.encoderYPinALast = sys.nY;
 }
