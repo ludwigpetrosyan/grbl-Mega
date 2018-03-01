@@ -143,8 +143,8 @@
   #define zDownPin      42 //40   // 
   #define xySetPin        41 //39   // 
   #define zSetPin          40 //38   // 
-  #define zHometPin    39 //36   //
-  #define xyHomePin    38 //36   //
+  #define zHometPin    38 //36   //
+  #define xyHomePin    39 //36   //
   
   #define StepSetPin     37 //37   //
   #define goXyPin         36 //36   // home
